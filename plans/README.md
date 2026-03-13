@@ -1,0 +1,23 @@
+# Plans Directory
+
+- `plans/` is the only planning workspace.
+- Append-only monthly plan files: `plans/YYYY-MM.md`.
+- Keep `plans/INDEX.md` current.
+- Never delete historical plan entries.
+- Update planning artifacts before implementation, during meaningful scope changes, and immediately after verification.
+- Treat missing `plans/` updates for changed functionality as an incomplete task.
+- Each monthly file is the general checklist for features implemented during that period.
+- For reviewed backlog items, record `implemented-verified`, `partial`, or `not-implemented` with evidence.
+- For each significant feature update, create a standalone implementation document:
+  - `plans/YYYY-MM-DD-feature-name.md`
+- Each implementation document must include:
+  - the request summary
+  - the full implementation plan copied from the agent output
+  - affected files and integration points
+  - verification commands and outcomes
+  - final status and follow-up items
+- Each monthly checklist entry should link to the dated implementation document for that feature update.
+- Significant code changes must leave an append-only audit trail in `plans/` describing what changed, why it changed, and how it was verified.
+- If migrating from an older root planning file, preserve it as `plans/legacy-plans.md`.
+- Do not overwrite existing monthly plan files during bootstrap updates; only create missing scaffolding.
+- Use `scripts/create-implementation-doc.sh` to create dated implementation docs and update `plans/INDEX.md`.
