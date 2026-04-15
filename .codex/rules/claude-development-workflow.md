@@ -1,11 +1,11 @@
 # Development Workflow
 
-Source of truth: `/rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
+Source of truth: `rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
 
 ## Repo-Specific Inputs
-1. Read `/BOOTSTRAPPER_SPEC.md` before planning or implementing bootstrapper behavior.
-2. Use `/README.md` for operator workflow and GitHub publishing steps.
-3. Treat `/projectbootstrapper.txt` as a legacy reference only unless it has been promoted into `/BOOTSTRAPPER_SPEC.md`.
+1. Read `BOOTSTRAPPER_SPEC.md` before planning or implementing project behavior.
+2. Use `README.md` for repo layout and workflow notes.
+3. Treat `projectbootstrapper.txt` as a legacy reference only unless it has been promoted into `BOOTSTRAPPER_SPEC.md`.
 
 ## Gate A: Pre-Change Trace
 1. Trace impacted execution paths.

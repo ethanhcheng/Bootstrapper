@@ -1,0 +1,19 @@
+LEGACY NOTE
+
+This file is retained for reference only.
+
+Canonical repo documents:
+- `README.md`
+- `BOOTSTRAPPER_SPEC.md`
+- `AGENTS.md`
+
+Do not treat the remaining contents of this file as the authoritative project specification.
+
+Use the Bootstrapper source that installed this repo's scaffold to inspect or refresh it:
+
+```bash
+/path/to/bootstrapper/scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo
+/path/to/bootstrapper/scripts/bootstrap_agent_governance.sh --auto-update /path/to/repo
+```
+
+Project-specific behavior belongs in `BOOTSTRAPPER_SPEC.md`.

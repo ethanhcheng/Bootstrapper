@@ -1,0 +1,5 @@
+interface:
+  display_name: "Agent Governance Scaffold"
+  short_description: "Bootstrap portable repo governance"
+  default_prompt: "Use $agent-governance-scaffold to install or update the portable governance scaffold in this repo."
+

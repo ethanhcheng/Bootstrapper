@@ -1,5 +1,7 @@
 {
-  "version": "2026-03-01.6",
-  "updated_at_utc": "2026-03-13T15:32:16.886134+00:00",
-  "skill_dir": "/Users/ethan/.codex/skills/agent-governance-scaffold"
+  "version": "2026-04-15.1",
+  "scaffold_version": "2026-04-15.1",
+  "updated_at_utc": "2026-04-15T17:13:59.073858+00:00",
+  "source_kind": "agent-governance-scaffold",
+  "source_path": "/home/ethan/Bootstrapper/skills/agent-governance-scaffold"
 }

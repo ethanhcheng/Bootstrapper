@@ -9,52 +9,13 @@ Canonical repo documents:
 
 Do not treat the remaining contents of this file as the authoritative bootstrapper specification.
 
-~/.codex/skills/agent-governance-scaffold/scripts/bootstrap_agent_governance.sh /path/to/your/project
+This repo is the canonical Bootstrapper source now.
 
- Confidence: high.
+Primary commands:
+- `./scripts/check-bootstrapper-alignment.sh`
+- `./scripts/bootstrap_agent_governance.sh /path/to/repo`
+- `./scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo`
+- `./scripts/bootstrap_agent_governance.sh --auto-update /path/to/repo`
+- `./scripts/update-local-codex-skill.sh`
 
-It’s saved here:
-
-- [bootstrap_agent_governance.sh](/Users/ethan/.codex/skills/agent-governance-scaffold/scripts/bootstrap_agent_governance.sh)
-- skill root: [agent-governance-scaffold](/Users/ethan/.codex/skills/agent-governance-scaffold)
-
-Related files:
-- [SKILL.md](/Users/ethan/.codex/skills/agent-governance-scaffold/SKILL.md)
-- [sync-agent-rules.sh](/Users/ethan/.codex/skills/agent-governance-scaffold/assets/templates/scripts/sync-agent-rules.sh)
-- [create-implementation-doc.sh](/Users/ethan/.codex/skills/agent-governance-scaffold/assets/templates/scripts/create-implementation-doc.sh)
-
-How to call it:
-
-Install/update scaffold into the current directory:
-```bash
-~/.codex/skills/agent-governance-scaffold/scripts/bootstrap_agent_governance.sh
-```
-
-Install/update scaffold into a specific repo:
-```bash
-~/.codex/skills/agent-governance-scaffold/scripts/bootstrap_agent_governance.sh /path/to/repo
-```
-
-Explicit update mode:
-```bash
-~/.codex/skills/agent-governance-scaffold/scripts/bootstrap_agent_governance.sh --update /path/to/repo
-```
-
-Check whether a repo is behind the current scaffold version:
-```bash
-~/.codex/skills/agent-governance-scaffold/scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo
-```
-
-Auto-update only if the repo is behind:
-```bash
-~/.codex/skills/agent-governance-scaffold/scripts/bootstrap_agent_governance.sh --auto-update /path/to/repo
-```
-
-Create a dated implementation doc inside a bootstrapped repo:
-```bash
-/path/to/repo/scripts/create-implementation-doc.sh 2026-03-01 feature-name
-```
-
-If you want, next step:
-1. I create a `new-repo` wrapper around `gh repo create` that runs this automatically.
-2. I create a short README snippet you can keep outside the repo with the exact bootstrap commands.
+Project-specific behavior belongs in `BOOTSTRAPPER_SPEC.md`.

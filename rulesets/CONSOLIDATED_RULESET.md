@@ -9,7 +9,7 @@ Edit `.cursor/rules/*` and `.claude/rules/*`, keep them aligned, then re-run the
 
 # Comprehensive Code Review Protocol
 
-Source of truth: `/rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
+Source of truth: `rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
 
 ## Core Principles
 
@@ -89,12 +89,12 @@ Treat me as an equal peer, not a user to appease. Be concise, blunt, and intelle
 
 # Development Workflow
 
-Source of truth: `/rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
+Source of truth: `rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
 
 ## Repo-Specific Inputs
-1. Read `/BOOTSTRAPPER_SPEC.md` before planning or implementing bootstrapper behavior.
-2. Use `/README.md` for operator workflow and GitHub publishing steps.
-3. Treat `/projectbootstrapper.txt` as a legacy reference only unless it has been promoted into `/BOOTSTRAPPER_SPEC.md`.
+1. Read `BOOTSTRAPPER_SPEC.md` before planning or implementing project behavior.
+2. Use `README.md` for repo layout and workflow notes.
+3. Treat `projectbootstrapper.txt` as a legacy reference only unless it has been promoted into `BOOTSTRAPPER_SPEC.md`.
 
 ## Gate A: Pre-Change Trace
 1. Trace impacted execution paths.
@@ -158,12 +158,13 @@ Apply clear naming, explicit error handling, and minimal side effects.
 
 # Technology Stack Guidance
 
-- This repository is documentation-first and governance-first; keep bootstrapper requirements in `BOOTSTRAPPER_SPEC.md`.
+- This repository is documentation-first and governance-first; keep project requirements in `BOOTSTRAPPER_SPEC.md`.
 - Keep machine setup and GitHub workflow steps in `README.md`.
 - Preserve `.cursor/`, `.claude/`, `.codex/`, `rulesets/`, `plans/`, and `scripts/` in version control so cloned copies behave consistently across machines.
 - Prefer existing stack patterns before adding dependencies. Unless a new dependency offers optimizations. If implementing a new dependency to replace an old one, make sure the old code that uses it traces with the new dependency/library.
 - Centralize API wrappers and shared transformations.
 - Keep route handlers thin and integration points explicit.
+- Background services, popup daemons, polling scripts, and agent-facing helpers must be resource-conscious: minimize idle RAM, keep polling intervals no tighter than needed, prefer cached or event-driven data over heavyweight long-lived processes, and never keep agent CLIs running in the background when on-demand reads are sufficient.
 
 
 ## sandbox-permissions

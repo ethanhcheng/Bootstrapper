@@ -1,6 +1,6 @@
 # Comprehensive Code Review Protocol
 
-Source of truth: `/rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
+Source of truth: `rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
 
 ## Core Principles
 
