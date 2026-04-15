@@ -8,7 +8,7 @@ This file is the project-specific source of truth for what the Bootstrapper repo
   - the portable bootstrapper repo root
   - the installable Codex skill at `skills/agent-governance-scaffold/`
   - downstream bootstrapped target repos such as `/home/ethan/.config`
-- Let any machine clone this repo, check alignment, bootstrap a target repo, and explicitly refresh the installed local Codex skill from the same canonical source.
+- Let any machine clone this repo, check alignment against other local Bootstrapper copies, bootstrap an existing target repo or non-git folder, and explicitly refresh the installed local Codex skill from the same canonical source.
 
 ## Agent Instructions
 
@@ -32,6 +32,7 @@ This file is the project-specific source of truth for what the Bootstrapper repo
 
 - `skills/agent-governance-scaffold/` as the canonical installable Codex skill.
 - `scripts/bootstrap_agent_governance.sh` as the stable repo-root bootstrap/update entrypoint.
+- `scripts/apply-bootstrapper-to-target.sh` as the compatibility entrypoint for applying the scaffold into existing folders.
 - `scripts/check-bootstrapper-alignment.sh` for repo-root, local-skill, and optional target-repo drift checks.
 - `scripts/update-local-codex-skill.sh` for explicit local skill refreshes.
 - Repo-root governance files, mirrored rules, and plans workflow files that self-host the shared scaffold.
@@ -40,8 +41,10 @@ This file is the project-specific source of truth for what the Bootstrapper repo
 
 ```bash
 ./scripts/check-bootstrapper-alignment.sh
+./scripts/check-bootstrapper-alignment.sh --target /path/to/local/bootstrapper
 ./scripts/check-bootstrapper-alignment.sh --target /path/to/repo
 ./scripts/bootstrap_agent_governance.sh /path/to/repo
+./scripts/apply-bootstrapper-to-target.sh /path/to/existing-folder
 ./scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo
 ./scripts/bootstrap_agent_governance.sh --auto-update /path/to/repo
 ./scripts/update-local-codex-skill.sh
@@ -63,7 +66,9 @@ This file is the project-specific source of truth for what the Bootstrapper repo
 ## Verification
 
 - `./scripts/check-bootstrapper-alignment.sh` reports the repo root aligned with the embedded skill.
+- `./scripts/check-bootstrapper-alignment.sh --target /path/to/local/bootstrapper` reports whether another local Bootstrapper copy is behind this repo clone.
 - `./scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo` reports current or drifted status for a downstream target.
+- `./scripts/bootstrap_agent_governance.sh /path/to/non-git-folder` succeeds even when `plans/<current-month>.md` already exists but is missing required scaffold headings.
 - `./scripts/update-local-codex-skill.sh` followed by `diff -qr` makes the installed local skill byte-match the embedded repo skill.
 
 ## Non-Goals

@@ -11,6 +11,8 @@ Use this skill when a repo should carry the same governance files across Codex, 
 
 - Run `scripts/bootstrap_agent_governance.sh` to scaffold the current directory.
 - Run `scripts/bootstrap_agent_governance.sh /path/to/repo` to target another repo.
+- Run `scripts/bootstrap_agent_governance.sh /path/to/folder` for an existing non-empty folder; a git repo is not required.
+- Run `scripts/bootstrap_agent_governance.sh --force-spec /path/to/repo` when you intentionally want to replace an existing `BOOTSTRAPPER_SPEC.md`.
 - Run `scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo` to compare the repo manifest with the current skill version.
 - Run `scripts/bootstrap_agent_governance.sh --auto-update /path/to/repo` to refresh only when the repo is missing or behind the current scaffold version.
 
@@ -44,9 +46,9 @@ Use this skill when a repo should carry the same governance files across Codex, 
 ## Safety Model
 
 - Governance-managed rule files and helper scripts are refreshed from the skill templates.
-- Existing monthly plan files are never overwritten.
+- Existing monthly plan files are never overwritten, and missing required monthly headings are repaired when the file already exists.
 - `README.md`, `BOOTSTRAPPER_SPEC.md`, and `projectbootstrapper.txt` are treated as repo-owned content after creation, so they are only created when missing.
-- The script writes `.agent-governance-manifest.json` with the installed skill path so later checks can detect drift.
+- The script writes `.agent-governance-manifest.json` with the scaffold version and source path so later checks can detect drift.
 
 ## After Bootstrap
 

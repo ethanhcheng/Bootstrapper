@@ -4,6 +4,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE_DIR="$ROOT_DIR/assets/templates"
 SCAFFOLD_VERSION="2026-04-15.1"
+SOURCE_COMMIT=""
+
+if git -C "$ROOT_DIR" rev-parse --short HEAD >/dev/null 2>&1; then
+  SOURCE_COMMIT="$(git -C "$ROOT_DIR" rev-parse --short HEAD)"
+fi
 
 usage() {
   cat <<'EOF'
@@ -12,35 +17,58 @@ Usage:
   scripts/bootstrap_agent_governance.sh --update [repo_path]
   scripts/bootstrap_agent_governance.sh --check-updates [repo_path]
   scripts/bootstrap_agent_governance.sh --auto-update [repo_path]
+  scripts/bootstrap_agent_governance.sh --force-spec [repo_path]
+
+Behavior:
+  - Works on existing non-empty folders.
+  - Does not require the target folder to already be a git repository.
+  - Preserves repo-owned docs unless --force-spec is used for BOOTSTRAPPER_SPEC.md.
 EOF
 }
 
 MODE="install"
-case "${1:-}" in
-  --update)
-    MODE="update"
-    shift
-    ;;
-  --check-updates)
-    MODE="check"
-    shift
-    ;;
-  --auto-update)
-    MODE="auto-update"
-    shift
-    ;;
-  --help|-h)
-    usage
-    exit 0
-    ;;
-esac
+FORCE_SPEC=0
+TARGET_DIR=""
 
-if [[ $# -gt 1 ]]; then
-  usage >&2
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --update)
+      MODE="update"
+      shift
+      ;;
+    --check-updates)
+      MODE="check"
+      shift
+      ;;
+    --auto-update)
+      MODE="auto-update"
+      shift
+      ;;
+    --force-spec)
+      FORCE_SPEC=1
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      if [[ -n "$TARGET_DIR" ]]; then
+        usage >&2
+        exit 2
+      fi
+      TARGET_DIR="$1"
+      shift
+      ;;
+  esac
+done
+
+if [[ "$MODE" == "check" && "$FORCE_SPEC" -eq 1 ]]; then
+  echo "--force-spec cannot be used with --check-updates" >&2
   exit 2
 fi
 
-TARGET_DIR="${1:-$PWD}"
+TARGET_DIR="${TARGET_DIR:-$PWD}"
 if [[ ! -d "$TARGET_DIR" ]]; then
   echo "Target directory does not exist: $TARGET_DIR" >&2
   exit 1
@@ -204,9 +232,8 @@ ensure_current_month_plan() {
   current_date="$(date +%Y-%m-%d)"
   local month_path="$TARGET_DIR/plans/$current_month.md"
 
-  [[ -f "$month_path" ]] && return
-
-  cat > "$month_path" <<EOF
+  if [[ ! -f "$month_path" ]]; then
+    cat > "$month_path" <<EOF
 # $current_month Plans
 
 ## Monthly Feature Checklist
@@ -243,10 +270,59 @@ ensure_current_month_plan() {
 - Add one entry for each dated implementation document created this month.
 - Record whether each item is \`implemented-verified\`, \`partial\`, or \`not-implemented\`.
 EOF
+    return
+  fi
+
+  python3 - "$month_path" <<'PY'
+import sys
+from pathlib import Path
+
+month_path = Path(sys.argv[1])
+lines = month_path.read_text(encoding="utf-8").splitlines()
+
+def ensure_heading(title: str, content_lines: list[str]) -> None:
+    heading = f"## {title}"
+    if heading in lines:
+        return
+    if lines and lines[-1] != "":
+        lines.append("")
+    lines.append(heading)
+    lines.extend(content_lines)
+
+ensure_heading(
+    "Monthly Feature Checklist",
+    [
+        "- Add one checklist entry per significant feature implementation.",
+        "- Each entry should include:",
+        "  - the implementation date",
+        "  - a short summary",
+        "  - status such as `planned`, `in-progress`, or `implemented-verified`",
+        "  - a `Doc:` line pointing to `plans/YYYY-MM-DD-feature-name.md`",
+        "- Update this file before implementation, during meaningful scope changes, and after verification.",
+        "- Missing monthly checklist updates mean the task is not complete.",
+    ],
+)
+
+ensure_heading(
+    "Implementation Docs Created",
+    [
+        "- Add one entry for each dated implementation document created this month.",
+        "- Record whether each item is `implemented-verified`, `partial`, or `not-implemented`.",
+    ],
+)
+
+collapsed = []
+for line in lines:
+    if line == "" and collapsed and collapsed[-1] == "":
+        continue
+    collapsed.append(line)
+
+month_path.write_text("\n".join(collapsed).rstrip() + "\n", encoding="utf-8")
+PY
 }
 
 write_manifest() {
-  python3 - "$MANIFEST_PATH" "$SCAFFOLD_VERSION" "$ROOT_DIR" <<'PY'
+  python3 - "$MANIFEST_PATH" "$SCAFFOLD_VERSION" "$ROOT_DIR" "$SOURCE_COMMIT" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -254,6 +330,7 @@ from pathlib import Path
 path = Path(sys.argv[1])
 version = sys.argv[2]
 source_path = sys.argv[3]
+source_commit = sys.argv[4]
 
 path.write_text(
     json.dumps(
@@ -263,6 +340,7 @@ path.write_text(
             "updated_at_utc": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
             "source_kind": "agent-governance-scaffold",
             "source_path": source_path,
+            "source_repo_commit": source_commit or None,
         },
         indent=2,
     )
@@ -320,7 +398,11 @@ install_scaffold() {
   done
 
   copy_if_missing "$TEMPLATE_DIR/README.md" "$TARGET_DIR/README.md"
-  copy_if_missing "$TEMPLATE_DIR/BOOTSTRAPPER_SPEC.md" "$TARGET_DIR/BOOTSTRAPPER_SPEC.md"
+  if [[ "$FORCE_SPEC" -eq 1 ]]; then
+    copy_managed_file "$TEMPLATE_DIR/BOOTSTRAPPER_SPEC.md" "$TARGET_DIR/BOOTSTRAPPER_SPEC.md"
+  else
+    copy_if_missing "$TEMPLATE_DIR/BOOTSTRAPPER_SPEC.md" "$TARGET_DIR/BOOTSTRAPPER_SPEC.md"
+  fi
   copy_managed_file "$TEMPLATE_DIR/plans/README.md" "$TARGET_DIR/plans/README.md"
   copy_managed_file "$TEMPLATE_DIR/plans/IMPLEMENTATION_TEMPLATE.md" "$TARGET_DIR/plans/IMPLEMENTATION_TEMPLATE.md"
   copy_managed_file "$TEMPLATE_DIR/plans/legacy-plans.md" "$TARGET_DIR/plans/legacy-plans.md"
@@ -332,6 +414,7 @@ install_scaffold() {
   write_manifest
 
   "$TARGET_DIR/scripts/sync-agent-rules.sh"
+  "$TARGET_DIR/scripts/sync-agent-rules.sh" --check
   "$TARGET_DIR/scripts/verify-plans-workflow.sh"
 }
 
@@ -347,6 +430,9 @@ case "$MODE" in
     if needs_update; then
       install_scaffold
       echo "Scaffold installed or updated: $TARGET_DIR"
+      if [[ ! -d "$TARGET_DIR/.git" ]]; then
+        echo "Note: target directory is not a git repository yet. Run 'git init -b main' when you want to version it."
+      fi
     else
       echo "Scaffold already up to date: $TARGET_DIR"
     fi
@@ -354,6 +440,9 @@ case "$MODE" in
   install|update)
     install_scaffold
     echo "Scaffold installed or updated: $TARGET_DIR"
+    if [[ ! -d "$TARGET_DIR/.git" ]]; then
+      echo "Note: target directory is not a git repository yet. Run 'git init -b main' when you want to version it."
+    fi
     ;;
   *)
     echo "Unknown mode: $MODE" >&2
