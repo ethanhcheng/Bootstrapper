@@ -6,6 +6,15 @@
 - Use `README.md` for repo onboarding and workflow notes.
 - Treat `projectbootstrapper.txt` as a legacy reference only, not the authoritative project spec.
 
+## Prior Implementation Context
+
+Treat `plans/` as a reference library, not a checklist to memorize.
+
+- At the start of any new task, read `plans/INDEX.md` to see what features have been implemented before.
+- Before implementing something similar to prior work, read the matching `plans/YYYY-MM-DD-feature-name.md` to match conventions, surface lessons learned, and avoid duplication.
+- Read individual dated docs on demand only. The INDEX tells you what exists; bodies are read when relevant. Do not auto-load any plan content — use the Read tool when relevant.
+- If a prior implementation conflicts with the current request, surface the conflict to the user instead of silently overriding it.
+
 ## Core Principles
 
 **Code is absolute.** If it works, it works. Never provide false code or untested solutions.

@@ -52,3 +52,12 @@ Source of truth: `rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
 4. Record edge cases, risks, and assumptions.
 5. Record verification commands and results.
 6. Record final implementation status and follow-up items.
+
+## Plans As Reference Library
+1. At the start of any new task, scan `plans/INDEX.md` to see what features have already been implemented.
+2. Before implementing something similar to prior work, read the matching `plans/YYYY-MM-DD-feature-name.md` to:
+   - Match prior conventions, patterns, and architectural choices.
+   - Surface lessons learned, edge cases, and follow-up items recorded by previous agents.
+   - Avoid duplicating work that has already been done.
+3. Read individual dated docs on demand only. The INDEX is the directory; bodies are read when relevant. Do not exhaustively load every plan into context.
+4. If a prior implementation conflicts with the current request, surface the conflict to the user rather than silently overriding it.

@@ -20,6 +20,7 @@ for path in "${required_files[@]}"; do
 done
 
 python3 - <<'PY' "$PLANS_DIR" "$CURRENT_MONTH"
+import re
 import sys
 from pathlib import Path
 
@@ -53,10 +54,41 @@ if ideas_exists:
         ]
     )
 
-failed = [label for label, ok in checks if not ok]
-if failed:
-    for label in failed:
+exit_status = 0
+for label, ok in checks:
+    if not ok:
         print(f"Plans workflow verification failed: {label}", file=sys.stderr)
+        exit_status = 1
+
+# INDEX <-> disk drift: every dated implementation doc on disk must be linked
+# from INDEX.md, and every INDEX.md link must resolve to a real file.
+dated_re = re.compile(r"^\d{4}-\d{2}-\d{2}-[a-z0-9-]+\.md$")
+link_re = re.compile(r"\(([0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+\.md)\)")
+on_disk = sorted({p.name for p in plans_dir.iterdir() if p.is_file() and dated_re.match(p.name)})
+in_index = sorted(set(link_re.findall(index_text)))
+
+missing_in_index = [d for d in on_disk if d not in in_index]
+missing_on_disk = [d for d in in_index if d not in on_disk]
+
+if missing_in_index:
+    print(
+        f"Plans workflow verification failed: {len(missing_in_index)} dated implementation docs on disk are not linked from INDEX.md:",
+        file=sys.stderr,
+    )
+    for d in missing_in_index:
+        print(f"  - plans/{d}", file=sys.stderr)
+    exit_status = 1
+
+if missing_on_disk:
+    print(
+        f"Plans workflow verification failed: {len(missing_on_disk)} INDEX.md links point to non-existent files:",
+        file=sys.stderr,
+    )
+    for d in missing_on_disk:
+        print(f"  - plans/{d}", file=sys.stderr)
+    exit_status = 1
+
+if exit_status:
     raise SystemExit(1)
 PY
 

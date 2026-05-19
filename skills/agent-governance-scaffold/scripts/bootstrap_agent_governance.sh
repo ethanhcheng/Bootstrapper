@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE_DIR="$ROOT_DIR/assets/templates"
-SCAFFOLD_VERSION="2026-04-15.1"
+SCAFFOLD_VERSION="2026-05-19.1"
 SOURCE_COMMIT=""
 
 if git -C "$ROOT_DIR" rev-parse --short HEAD >/dev/null 2>&1; then
