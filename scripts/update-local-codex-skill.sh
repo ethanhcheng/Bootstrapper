@@ -23,3 +23,11 @@ fi
 
 rm -f /tmp/bootstrapper-local-skill-diff.$$
 echo "Updated local Codex skill: $DEST_DIR"
+
+# Sync into Claude Code's user skills directory (subdirectory format required for slash commands)
+CLAUDE_SKILLS_DIR="${CLAUDE_HOME:-$HOME/.claude}/skills/agent-governance-scaffold"
+mkdir -p "$CLAUDE_SKILLS_DIR"
+cp "$SOURCE_DIR/SKILL.md" "$CLAUDE_SKILLS_DIR/SKILL.md"
+# Remove legacy flat-file install if present
+rm -f "${CLAUDE_HOME:-$HOME/.claude}/skills/agent-governance-scaffold.md"
+echo "Updated local Claude skill: $CLAUDE_SKILLS_DIR/SKILL.md"

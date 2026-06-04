@@ -33,11 +33,80 @@ Before implementing ANY changes:
 - Look for race conditions in async/threaded code
 - Handle empty inputs, boundary values, and unexpected types
 - Ensure proper resource cleanup (files, connections, threads, locks)
+- Check concurrent edge cases (two requests for the same resource/session, rapid connect/disconnect, double-close)
+- Check malformed input (invalid JSON, unexpected content-type, oversized payload, truncated stream)
 
 ### 5. Technology Stack Review
 - Periodically search the web for improvements to current stack
 - Evaluate if newer libraries/approaches would benefit the project
 - Consider performance, maintainability, and security implications
+
+### 6. Abstraction Review
+- Check whether the change should strengthen a real upgrade seam: provider, transport, storage, runtime controller, or platform adapter
+- Prefer cohesive stateful classes or focused modules when logic owns lifecycle, durable state, or replaceable implementations
+- Prefer composition over inheritance; inheritance requires a stable shared contract and multiple concrete implementations
+- Reject speculative wrappers or interfaces that do not solve a real replacement, testing, or platform-separation problem
+- Verify platform shells stay thin and shared behavior moves into neutral shared packages/modules when practical
+
+## Full Code Review Dimensions
+
+Every full code review (triggered by a review trigger or explicit request) must evaluate every file in scope against all of the following dimensions. Findings must be tiered (Critical / High / Moderate / Low) and written to a dated implementation document in `plans/`.
+
+### Resource Efficiency
+- Identify unnecessary object allocations, redundant copies, or repeated computation in hot paths.
+- Verify connection pools, executors, and caches are bounded and cleaned up on shutdown.
+- Check for unbounded collection growth (lists, dicts, deques, queues) in long-running loops or streams.
+- Verify temporary files and scratch storage have cleanup or TTL.
+
+### Speed / Latency
+- Identify blocking I/O on async event loops or UI threads.
+- Verify all network calls, subprocess calls, `thread.join()`, and `queue.get()` have explicit timeouts.
+- Check for sequential operations that could be concurrent (parallel awaits, executor batching).
+- Identify unnecessary serialization/deserialization round-trips.
+- Verify startup paths pre-load or warm critical resources.
+
+### Concurrency
+- Every shared mutable variable must be protected by a lock (`threading.Lock` for threads, `asyncio.Lock` for coroutines).
+- Every check-then-act pattern on shared state must be atomic (hold the lock across check and act).
+- No lock may be held across an `await`, blocking I/O call, or sleep (deadlock risk).
+- All background threads must be `daemon=True` and check a stop event/flag for clean shutdown.
+- All `asyncio.create_task()` results must be stored, awaited, or given exception handlers — no fire-and-forget without timeout.
+- Verify no TOCTOU (time-of-check-time-of-use) races on the file system or state transitions.
+
+### Memory Leaks
+- Verify all streams, file handles, connections, and subprocesses are closed in `finally` blocks or context managers.
+- Check for growing caches/registries without eviction (session locks, model caches, task registries).
+- Verify cancelled or timed-out async tasks do not leave orphaned references.
+- Check closures and lambdas for unintended variable capture that prevents garbage collection.
+- Verify daemon threads do not hold references to large objects after the owning scope exits.
+
+### Edge Cases
+- Null/None on every input, return value, and optional field.
+- Empty collections (empty list, empty string, empty bytes, empty dict).
+- Boundary values (zero, negative, max int, max float, empty buffer, single-element input).
+- Error returns from external services (HTTP 4xx/5xx, connection refused, DNS failure, timeout).
+- Malformed input (invalid JSON, unexpected content-type, oversized payload, truncated stream).
+- Concurrent edge cases (two requests for the same resource/session, rapid connect/disconnect, double-close).
+
+### Error Handling
+- No bare `except Exception` that swallows `asyncio.CancelledError` or `KeyboardInterrupt`.
+- Every external call (network, file, subprocess, inference) must have a try/except with logging.
+- Error messages must include context (what was attempted, which resource, what input).
+- Silent failures (returning None/default without logging) must be flagged.
+- Retry loops must have max attempt counts.
+
+### Security
+- No string interpolation/concatenation in SQL queries.
+- No unvalidated user input passed to subprocess, file paths, or eval.
+- Verify auth/HMAC checks use constant-time comparison.
+- Verify upload size and MIME/content-type validation.
+- Verify no secrets in logs, error messages, or response streams.
+
+### Contract Consistency
+- Function signatures must match between caller and callee across module boundaries.
+- Environment variables used in code must be present in `.env.example` and deploy env templates; `.env.example` must mirror `.env` keys with sensitive values redacted.
+- Container/compose service references must match actual service names and ports.
+- API route paths and methods must match client expectations.
 
 ## Quality Standards
 

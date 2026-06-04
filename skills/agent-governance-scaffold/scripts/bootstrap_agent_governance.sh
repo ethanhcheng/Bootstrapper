@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE_DIR="$ROOT_DIR/assets/templates"
-SCAFFOLD_VERSION="2026-04-15.1"
+SCAFFOLD_VERSION="2026-05-19.1"
 SOURCE_COMMIT=""
 
 if git -C "$ROOT_DIR" rev-parse --short HEAD >/dev/null 2>&1; then
@@ -14,6 +14,7 @@ usage() {
   cat <<'EOF'
 Usage:
   scripts/bootstrap_agent_governance.sh [repo_path]
+  scripts/bootstrap_agent_governance.sh --init [repo_path]
   scripts/bootstrap_agent_governance.sh --update [repo_path]
   scripts/bootstrap_agent_governance.sh --check-updates [repo_path]
   scripts/bootstrap_agent_governance.sh --auto-update [repo_path]
@@ -32,6 +33,10 @@ TARGET_DIR=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --init)
+      MODE="install"
+      shift
+      ;;
     --update)
       MODE="update"
       shift
@@ -405,7 +410,7 @@ install_scaffold() {
   fi
   copy_managed_file "$TEMPLATE_DIR/plans/README.md" "$TARGET_DIR/plans/README.md"
   copy_managed_file "$TEMPLATE_DIR/plans/IMPLEMENTATION_TEMPLATE.md" "$TARGET_DIR/plans/IMPLEMENTATION_TEMPLATE.md"
-  copy_managed_file "$TEMPLATE_DIR/plans/legacy-plans.md" "$TARGET_DIR/plans/legacy-plans.md"
+  copy_if_missing "$TEMPLATE_DIR/plans/legacy-plans.md" "$TARGET_DIR/plans/legacy-plans.md"
   copy_if_missing "$TEMPLATE_DIR/plans/IDEAS.md" "$TARGET_DIR/plans/IDEAS.md"
 
   ensure_plan_index "$current_month"

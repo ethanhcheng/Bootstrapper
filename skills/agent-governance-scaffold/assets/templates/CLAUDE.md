@@ -6,6 +6,15 @@
 - Use `README.md` for repo onboarding and workflow notes.
 - Treat `projectbootstrapper.txt` as a legacy reference only, not the authoritative project spec.
 
+## Prior Implementation Context
+
+Treat `plans/` as a reference library, not a checklist to memorize.
+
+- At the start of any new task, read `plans/INDEX.md` to see what features have been implemented before.
+- Before implementing something similar to prior work, read the matching `plans/YYYY-MM-DD-feature-name.md` to match conventions, surface lessons learned, and avoid duplication.
+- Read individual dated docs on demand only. The INDEX tells you what exists; bodies are read when relevant. Do not auto-load any plan content — use the Read tool when relevant.
+- If a prior implementation conflicts with the current request, surface the conflict to the user instead of silently overriding it.
+
 ## Core Principles
 
 **Code is absolute.** If it works, it works. Never provide false code or untested solutions.
@@ -43,6 +52,14 @@ Before implementing ANY changes:
 - Evaluate if newer libraries/approaches would benefit the project
 - Consider performance, maintainability, and security implications
 
+### 6. Abstraction and Object-Oriented Design
+- Use object-oriented or module abstraction where it creates a real upgrade seam
+- Keep transport, providers, storage, runtime controllers, and platform adapters separable
+- Prefer cohesive classes for stateful workflows and lifecycle-heavy logic
+- Prefer composition over inheritance; use inheritance only for stable contracts with multiple concrete implementations
+- Do not add speculative abstractions; every interface/base class/adapter must solve a real replacement, platform, or testing problem
+- Keep platform shells thin and move shared behavior into neutral shared packages when practical
+
 ## Quality Standards
 
 ### Never Do
@@ -58,6 +75,8 @@ Before implementing ANY changes:
 - Update downstream code when changing interfaces
 - Handle errors gracefully
 - Search for optimizations and improvements
+- Extract monolithic files by responsibility when it materially improves upgradeability or continuity
+- Ensure new abstractions have explicit ownership of state, lifecycle, and public contract
 
 ## Review Triggers
 

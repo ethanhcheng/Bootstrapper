@@ -22,6 +22,9 @@ Canonical sources:
 - Update planning artifacts before implementation, during meaningful scope changes, and immediately after verification.
 - Treat missing `plans/` updates for changed functionality as an incomplete task.
 - Significant code changes must leave an append-only audit trail in `plans/`.
+- Use real abstraction seams for upgradeability: transport, providers, storage, runtime controllers, and platform adapters.
+- Prefer composition over inheritance, thin platform shells, and neutral shared packages for shared behavior.
+- Do not introduce speculative wrappers; every new abstraction must solve a real replacement, platform, or testing need.
 - The response style addendum in the shared code review rule is mandatory for Codex responses.
 
 ## Plans Workflow
@@ -29,3 +32,9 @@ Canonical sources:
 - `plans/YYYY-MM-DD-feature-name.md` stores dated implementation records.
 - `plans/INDEX.md` links monthly files and implementation documents.
 - `plans/legacy-plans.md` is archive-only.
+
+## Prior Implementation Context
+- At the start of any new task, read `plans/INDEX.md` to see what features have been implemented before.
+- Before implementing something similar to prior work, read the matching `plans/YYYY-MM-DD-feature-name.md` to match conventions, surface lessons learned, and avoid duplication.
+- Read individual dated docs on demand only. Treat the INDEX as the directory and bodies as on-demand reads.
+- If a prior implementation conflicts with the current request, surface the conflict to the user instead of silently overriding it.

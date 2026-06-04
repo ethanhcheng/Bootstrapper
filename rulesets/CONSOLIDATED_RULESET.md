@@ -42,11 +42,80 @@ Before implementing ANY changes:
 - Look for race conditions in async/threaded code
 - Handle empty inputs, boundary values, and unexpected types
 - Ensure proper resource cleanup (files, connections, threads, locks)
+- Check concurrent edge cases (two requests for the same resource/session, rapid connect/disconnect, double-close)
+- Check malformed input (invalid JSON, unexpected content-type, oversized payload, truncated stream)
 
 ### 5. Technology Stack Review
 - Periodically search the web for improvements to current stack
 - Evaluate if newer libraries/approaches would benefit the project
 - Consider performance, maintainability, and security implications
+
+### 6. Abstraction Review
+- Check whether the change should strengthen a real upgrade seam: provider, transport, storage, runtime controller, or platform adapter
+- Prefer cohesive stateful classes or focused modules when logic owns lifecycle, durable state, or replaceable implementations
+- Prefer composition over inheritance; inheritance requires a stable shared contract and multiple concrete implementations
+- Reject speculative wrappers or interfaces that do not solve a real replacement, testing, or platform-separation problem
+- Verify platform shells stay thin and shared behavior moves into neutral shared packages/modules when practical
+
+## Full Code Review Dimensions
+
+Every full code review (triggered by a review trigger or explicit request) must evaluate every file in scope against all of the following dimensions. Findings must be tiered (Critical / High / Moderate / Low) and written to a dated implementation document in `plans/`.
+
+### Resource Efficiency
+- Identify unnecessary object allocations, redundant copies, or repeated computation in hot paths.
+- Verify connection pools, executors, and caches are bounded and cleaned up on shutdown.
+- Check for unbounded collection growth (lists, dicts, deques, queues) in long-running loops or streams.
+- Verify temporary files and scratch storage have cleanup or TTL.
+
+### Speed / Latency
+- Identify blocking I/O on async event loops or UI threads.
+- Verify all network calls, subprocess calls, `thread.join()`, and `queue.get()` have explicit timeouts.
+- Check for sequential operations that could be concurrent (parallel awaits, executor batching).
+- Identify unnecessary serialization/deserialization round-trips.
+- Verify startup paths pre-load or warm critical resources.
+
+### Concurrency
+- Every shared mutable variable must be protected by a lock (`threading.Lock` for threads, `asyncio.Lock` for coroutines).
+- Every check-then-act pattern on shared state must be atomic (hold the lock across check and act).
+- No lock may be held across an `await`, blocking I/O call, or sleep (deadlock risk).
+- All background threads must be `daemon=True` and check a stop event/flag for clean shutdown.
+- All `asyncio.create_task()` results must be stored, awaited, or given exception handlers — no fire-and-forget without timeout.
+- Verify no TOCTOU (time-of-check-time-of-use) races on the file system or state transitions.
+
+### Memory Leaks
+- Verify all streams, file handles, connections, and subprocesses are closed in `finally` blocks or context managers.
+- Check for growing caches/registries without eviction (session locks, model caches, task registries).
+- Verify cancelled or timed-out async tasks do not leave orphaned references.
+- Check closures and lambdas for unintended variable capture that prevents garbage collection.
+- Verify daemon threads do not hold references to large objects after the owning scope exits.
+
+### Edge Cases
+- Null/None on every input, return value, and optional field.
+- Empty collections (empty list, empty string, empty bytes, empty dict).
+- Boundary values (zero, negative, max int, max float, empty buffer, single-element input).
+- Error returns from external services (HTTP 4xx/5xx, connection refused, DNS failure, timeout).
+- Malformed input (invalid JSON, unexpected content-type, oversized payload, truncated stream).
+- Concurrent edge cases (two requests for the same resource/session, rapid connect/disconnect, double-close).
+
+### Error Handling
+- No bare `except Exception` that swallows `asyncio.CancelledError` or `KeyboardInterrupt`.
+- Every external call (network, file, subprocess, inference) must have a try/except with logging.
+- Error messages must include context (what was attempted, which resource, what input).
+- Silent failures (returning None/default without logging) must be flagged.
+- Retry loops must have max attempt counts.
+
+### Security
+- No string interpolation/concatenation in SQL queries.
+- No unvalidated user input passed to subprocess, file paths, or eval.
+- Verify auth/HMAC checks use constant-time comparison.
+- Verify upload size and MIME/content-type validation.
+- Verify no secrets in logs, error messages, or response streams.
+
+### Contract Consistency
+- Function signatures must match between caller and callee across module boundaries.
+- Environment variables used in code must be present in `.env.example` and deploy env templates; `.env.example` must mirror `.env` keys with sensitive values redacted.
+- Container/compose service references must match actual service names and ports.
+- API route paths and methods must match client expectations.
 
 ## Quality Standards
 
@@ -111,8 +180,23 @@ Source of truth: `rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
 4. Run feasible checks.
 5. Verify runtime backend-to-frontend flow so requested data loads and renders in the intended UI.
 6. Run full end-to-end UI regression for affected pages/flows.
-7. Record outcomes in `plans/YYYY-MM.md`.
-8. Record per-item backlog audit status: `implemented-verified`, `partial`, or `not-implemented`.
+7. Evaluate against all Full Code Review Dimensions (see `.claude/rules/code-review.md` / `rulesets/CONSOLIDATED_RULESET.md` § Full Code Review Dimensions): resource efficiency, speed, concurrency, memory leaks, edge cases, error handling, security, contract consistency.
+8. Record outcomes in `plans/YYYY-MM.md`.
+9. Record per-item backlog audit status: `implemented-verified`, `partial`, or `not-implemented`.
+
+## Cross-Client Parity
+1. Backend/contract changes are incomplete until every impacted consumer (GUI, API client, companion app) is updated or the scope exception is explicitly documented in `plans/`.
+2. Shared UI/runtime surfaces must remain behaviorally aligned; when one shared surface changes, review and update the counterpart in the same task unless the change is explicitly scoped to one surface or platform.
+3. Companion/admin clients may diverge intentionally, but they must still reflect backend contract changes relevant to their scope.
+4. Backend feature work is not complete until the relevant frontend surfaces reflect the change or the scoped omission is documented in `plans/`.
+
+## Abstraction Requirements
+1. Create explicit abstraction seams where upgrades are likely: providers, transport, storage, runtime controllers, and platform adapters.
+2. Prefer cohesive classes or focused modules for stateful workflows and lifecycle-heavy logic.
+3. Prefer composition over inheritance; use inheritance only for stable shared contracts with multiple implementations.
+4. Keep platform shells thin and move shared behavior into neutral shared packages/modules.
+5. Every new abstraction must justify itself by replaceability, testability, or platform separation; speculative wrappers are not allowed.
+6. When replacing old code paths with a new abstraction, move all callers to the seam or record the staged migration in `plans/`.
 
 ## Planning Requirements
 1. Append every new task to the active monthly file in `plans/`.
@@ -142,16 +226,70 @@ Source of truth: `rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
 5. Record verification commands and results.
 6. Record final implementation status and follow-up items.
 
+## Plans As Reference Library
+1. At the start of any new task, scan `plans/INDEX.md` to see what features have already been implemented.
+2. Before implementing something similar to prior work, read the matching `plans/YYYY-MM-DD-feature-name.md` to:
+   - Match prior conventions, patterns, and architectural choices.
+   - Surface lessons learned, edge cases, and follow-up items recorded by previous agents.
+   - Avoid duplicating work that has already been done.
+3. Read individual dated docs on demand only. The INDEX is the directory; bodies are read when relevant. Do not exhaustively load every plan into context.
+4. If a prior implementation conflicts with the current request, surface the conflict to the user rather than silently overriding it.
+
 
 ## python-standards
 
-# Language Standards
+# Python Standards
 
-Apply clear naming, explicit error handling, and minimal side effects.
+Apply clear naming, explicit error handling, and minimal side effects. Validate inputs at boundaries, avoid silent exception handling, and remove dead code and unused imports.
 
-- Validate inputs at boundaries.
-- Avoid silent exception handling.
-- Remove dead code and unused imports.
+## Async/Await
+- Use `asyncio.get_running_loop()` in async functions (not `get_event_loop()`)
+- Wrap blocking I/O in `loop.run_in_executor(None, fn)`
+- Add try/except around external service calls
+
+## File Operations
+- Always specify `encoding='utf-8'` for text files
+- Use `pathlib.Path` over `os.path` when possible
+- Close files properly (use context managers)
+
+## Threading
+- Use locks for shared mutable state
+- Make background threads `daemon=True`
+- Check locks and state atomically (no TOCTOU)
+
+## Race Condition Prevention
+- Wrap all check-then-act patterns in a lock: `with lock: if x: use(x)`
+- Use `threading.Lock` for thread-shared state, `asyncio.Lock` for async-shared state
+- Never append/modify shared lists or dicts from multiple threads without a lock
+- All `queue.get()` calls must have a timeout to prevent indefinite blocking
+- Daemon threads must check a `_stop_event` or flag and exit cleanly on shutdown
+- External resource operations (open/close/read/write) must not race across threads
+
+## App Freeze & Break Prevention
+- Never perform blocking I/O (network, file, subprocess, inference) on the UI/main thread
+- All network requests must include explicit `timeout=` (connect + read)
+- All `thread.join()` calls must include a timeout
+- All subprocess calls must include a timeout
+- Every background thread and async task must have a top-level `try/except` with logging
+- All `while True` loops must have a break/stop-flag check and a sleep
+- All retry loops must have a max attempt count
+- UI updates from background threads must use the framework's thread-safe dispatch
+- Always close streams and file handles in `finally` blocks or context managers
+- Never hold a lock across an `await` or blocking call (deadlock risk)
+
+## Error Handling
+- Log exceptions with context: `log.warning("Action failed: %s", exc)`
+- Never silently swallow exceptions without logging
+- Error messages must include what was attempted, which resource, and what input
+
+## Imports
+- Remove unused imports
+- Use lazy imports for heavy modules
+- Prefer specific imports: `from module import func` over `import module`
+
+## Data Structures
+- Use `copy.deepcopy()` for nested dicts/lists when mutation must not leak
+- Initialize mutable defaults as `None`, not `[]` or `{}`
 
 
 ## tech-stack
