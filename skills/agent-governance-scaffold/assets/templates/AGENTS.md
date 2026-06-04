@@ -52,6 +52,14 @@ Before implementing ANY changes:
 - Evaluate if newer libraries/approaches would benefit the project
 - Consider performance, maintainability, and security implications
 
+### 6. Abstraction and Object-Oriented Design
+- Use object-oriented or module abstraction where it creates a real upgrade seam
+- Keep transport, providers, storage, runtime controllers, and platform adapters separable
+- Prefer cohesive classes for stateful workflows and lifecycle-heavy logic
+- Prefer composition over inheritance; use inheritance only for stable contracts with multiple concrete implementations
+- Do not add speculative abstractions; every interface/base class/adapter must solve a real replacement, platform, or testing problem
+- Keep platform shells thin and move shared behavior into neutral shared packages when practical
+
 ## Quality Standards
 
 ### Never Do
@@ -67,6 +75,8 @@ Before implementing ANY changes:
 - Update downstream code when changing interfaces
 - Handle errors gracefully
 - Search for optimizations and improvements
+- Extract monolithic files by responsibility when it materially improves upgradeability or continuity
+- Ensure new abstractions have explicit ownership of state, lifecycle, and public contract
 
 ## Review Triggers
 

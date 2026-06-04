@@ -22,6 +22,9 @@ Canonical sources:
 - Update planning artifacts before implementation, during meaningful scope changes, and immediately after verification.
 - Treat missing `plans/` updates for changed functionality as an incomplete task.
 - Significant code changes must leave an append-only audit trail in `plans/`.
+- Use real abstraction seams for upgradeability: transport, providers, storage, runtime controllers, and platform adapters.
+- Prefer composition over inheritance, thin platform shells, and neutral shared packages for shared behavior.
+- Do not introduce speculative wrappers; every new abstraction must solve a real replacement, platform, or testing need.
 - The response style addendum in the shared code review rule is mandatory for Codex responses.
 
 ## Plans Workflow
