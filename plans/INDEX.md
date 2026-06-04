@@ -15,6 +15,7 @@
 - [2026-05-19-plans-as-reference-and-strict-verifier](2026-05-19-plans-as-reference-and-strict-verifier.md)
 - [2026-05-19-scaffold-version-bump-and-bootstrapper-port](2026-05-19-scaffold-version-bump-and-bootstrapper-port.md)
 - [2026-06-04-port-lost-governance-logic-from-jiggamumps](2026-06-04-port-lost-governance-logic-from-jiggamumps.md)
+- [2026-06-04-preserve-legacy-plans-on-update](2026-06-04-preserve-legacy-plans-on-update.md)
 
 ## Legacy Archive
 - [legacy-plans](legacy-plans.md)

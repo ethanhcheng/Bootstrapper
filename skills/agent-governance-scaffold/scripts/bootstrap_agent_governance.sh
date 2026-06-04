@@ -405,7 +405,7 @@ install_scaffold() {
   fi
   copy_managed_file "$TEMPLATE_DIR/plans/README.md" "$TARGET_DIR/plans/README.md"
   copy_managed_file "$TEMPLATE_DIR/plans/IMPLEMENTATION_TEMPLATE.md" "$TARGET_DIR/plans/IMPLEMENTATION_TEMPLATE.md"
-  copy_managed_file "$TEMPLATE_DIR/plans/legacy-plans.md" "$TARGET_DIR/plans/legacy-plans.md"
+  copy_if_missing "$TEMPLATE_DIR/plans/legacy-plans.md" "$TARGET_DIR/plans/legacy-plans.md"
   copy_if_missing "$TEMPLATE_DIR/plans/IDEAS.md" "$TARGET_DIR/plans/IDEAS.md"
 
   ensure_plan_index "$current_month"
