@@ -34,6 +34,7 @@ This file is the project-specific source of truth for what the Bootstrapper repo
 - `scripts/bootstrap_agent_governance.sh` as the stable repo-root bootstrap/update entrypoint.
 - `scripts/apply-bootstrapper-to-target.sh` as the compatibility entrypoint for applying the scaffold into existing folders.
 - `scripts/check-bootstrapper-alignment.sh` for repo-root, local-skill, and optional target-repo drift checks.
+- `scripts/install-bootstrap-command.sh` to install a global `bootstrap` launcher (`~/.local/bin/bootstrap`) that scaffolds the current directory from this clone.
 - `scripts/update-local-codex-skill.sh` for explicit local skill refreshes.
 - Repo-root governance files, mirrored rules, and plans workflow files that self-host the shared scaffold.
 
@@ -48,6 +49,11 @@ This file is the project-specific source of truth for what the Bootstrapper repo
 ./scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo
 ./scripts/bootstrap_agent_governance.sh --auto-update /path/to/repo
 ./scripts/update-local-codex-skill.sh
+./scripts/install-bootstrap-command.sh
+bootstrap
+bootstrap --init
+bootstrap --update
+bootstrap --check-updates
 ```
 
 ## Inputs
@@ -70,6 +76,7 @@ This file is the project-specific source of truth for what the Bootstrapper repo
 - `./scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo` reports current or drifted status for a downstream target.
 - `./scripts/bootstrap_agent_governance.sh /path/to/non-git-folder` succeeds even when `plans/<current-month>.md` already exists but is missing required scaffold headings.
 - `./scripts/update-local-codex-skill.sh` followed by `diff -qr` makes the installed local skill byte-match the embedded repo skill.
+- `./scripts/install-bootstrap-command.sh` installs `~/.local/bin/bootstrap`; a bare `bootstrap` in an empty directory then produces the full scaffold and `bootstrap --check-updates` reports it up to date.
 
 ## Non-Goals
 

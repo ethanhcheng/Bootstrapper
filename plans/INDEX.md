@@ -14,6 +14,8 @@
 - [2026-05-19-recursive-self-bootstrap-and-templates-sync](2026-05-19-recursive-self-bootstrap-and-templates-sync.md)
 - [2026-05-19-plans-as-reference-and-strict-verifier](2026-05-19-plans-as-reference-and-strict-verifier.md)
 - [2026-05-19-scaffold-version-bump-and-bootstrapper-port](2026-05-19-scaffold-version-bump-and-bootstrapper-port.md)
+- [2026-05-21-bootstrap-cli-launcher](2026-05-21-bootstrap-cli-launcher.md)
+- [2026-05-29-bootstrap-init-update-flags](2026-05-29-bootstrap-init-update-flags.md)
 - [2026-06-04-port-lost-governance-logic-from-jiggamumps](2026-06-04-port-lost-governance-logic-from-jiggamumps.md)
 - [2026-06-04-preserve-legacy-plans-on-update](2026-06-04-preserve-legacy-plans-on-update.md)
 

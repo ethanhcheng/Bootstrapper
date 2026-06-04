@@ -1,6 +1,7 @@
 ---
 name: agent-governance-scaffold
 description: Use when the user wants to install, restore, or update the portable agent-governance scaffold for Codex, Cursor, and Claude; recover the missing bootstrap_agent_governance.sh workflow; or apply mirrored repo rules, plans scaffolding, and Codex project rules to a repository.
+model: haiku
 ---
 
 # Agent Governance Scaffold
@@ -9,12 +10,15 @@ Use this skill when a repo should carry the same governance files across Codex, 
 
 ## Quick Start
 
-- Run `scripts/bootstrap_agent_governance.sh` to scaffold the current directory.
+- Run `scripts/bootstrap_agent_governance.sh` (or `--init`) to scaffold the current directory.
 - Run `scripts/bootstrap_agent_governance.sh /path/to/repo` to target another repo.
+- Run `scripts/bootstrap_agent_governance.sh --update /path/to/repo` to update an already-scaffolded directory against this clone.
 - Run `scripts/bootstrap_agent_governance.sh /path/to/folder` for an existing non-empty folder; a git repo is not required.
 - Run `scripts/bootstrap_agent_governance.sh --force-spec /path/to/repo` when you intentionally want to replace an existing `BOOTSTRAPPER_SPEC.md`.
 - Run `scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo` to compare the repo manifest with the current skill version.
 - Run `scripts/bootstrap_agent_governance.sh --auto-update /path/to/repo` to refresh only when the repo is missing or behind the current scaffold version.
+
+If the operator installed the global `bootstrap` command (via the Bootstrapper repo's `scripts/install-bootstrap-command.sh`), `bootstrap` in any directory is equivalent to running this script against that directory.
 
 ## What The Script Installs
 

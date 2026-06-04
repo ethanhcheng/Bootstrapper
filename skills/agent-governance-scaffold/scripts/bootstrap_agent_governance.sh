@@ -14,6 +14,7 @@ usage() {
   cat <<'EOF'
 Usage:
   scripts/bootstrap_agent_governance.sh [repo_path]
+  scripts/bootstrap_agent_governance.sh --init [repo_path]
   scripts/bootstrap_agent_governance.sh --update [repo_path]
   scripts/bootstrap_agent_governance.sh --check-updates [repo_path]
   scripts/bootstrap_agent_governance.sh --auto-update [repo_path]
@@ -32,6 +33,10 @@ TARGET_DIR=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --init)
+      MODE="install"
+      shift
+      ;;
     --update)
       MODE="update"
       shift

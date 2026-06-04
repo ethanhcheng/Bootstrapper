@@ -8,6 +8,7 @@ This repository is the canonical GitHub source for the portable agent-governance
 - `scripts/bootstrap_agent_governance.sh`: stable repo-root wrapper for bootstrapping or updating target repos.
 - `scripts/apply-bootstrapper-to-target.sh`: compatibility wrapper for applying the scaffold into an existing folder.
 - `scripts/check-bootstrapper-alignment.sh`: checks repo-root, embedded-skill, local-skill, and optional target-repo alignment.
+- `scripts/install-bootstrap-command.sh`: installs a global `bootstrap` command (`~/.local/bin/bootstrap`) that scaffolds the current directory from this clone.
 - `scripts/update-local-codex-skill.sh`: refreshes `~/.codex/skills/agent-governance-scaffold` from this repo clone.
 - `plans/`: append-only implementation and verification trail for Bootstrapper itself.
 
@@ -28,3 +29,19 @@ This repository is the canonical GitHub source for the portable agent-governance
 5. Use `./scripts/apply-bootstrapper-to-target.sh /path/to/folder` if you want the older “apply into an existing folder” entrypoint name.
 6. Use `./scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo` and `--auto-update` for routine downstream maintenance.
 7. After validating repo updates, run `./scripts/update-local-codex-skill.sh` to refresh the installed Codex skill from this clone, then restart Codex.
+
+## Global `bootstrap` Command
+
+Run `./scripts/install-bootstrap-command.sh` once to install a `bootstrap` command at `~/.local/bin/bootstrap` (override the location with `BOOTSTRAP_BIN_DIR`). It is a thin wrapper around `scripts/bootstrap_agent_governance.sh` with this clone's path baked in, so from then on you can scaffold any directory directly:
+
+```bash
+bootstrap                  # scaffold the current directory
+bootstrap --init           # scaffold the current directory (explicit synonym for the bare call)
+bootstrap --update         # update the current directory against this clone
+bootstrap --check-updates  # report scaffold drift for the current directory
+bootstrap --auto-update    # refresh only when missing or behind
+bootstrap --force-spec     # replace BOOTSTRAPPER_SPEC.md
+bootstrap /path/to/repo    # target another directory instead of the current one
+```
+
+Re-run the installer after moving the clone (the wrapper holds an absolute path) or after pulling updates that change the canonical script location. Ensure `~/.local/bin` is on your `PATH`.
