@@ -5,6 +5,7 @@
 - [2026-04](2026-04.md)
 - [2026-05](2026-05.md)
 - [2026-06](2026-06.md)
+- [2026-09](2026-09.md)
 
 ## Implementation Docs
 - [2026-03-13-apply-bootstrapper-to-existing-folder](2026-03-13-apply-bootstrapper-to-existing-folder.md)
@@ -18,6 +19,7 @@
 - [2026-05-29-bootstrap-init-update-flags](2026-05-29-bootstrap-init-update-flags.md)
 - [2026-06-04-port-lost-governance-logic-from-jiggamumps](2026-06-04-port-lost-governance-logic-from-jiggamumps.md)
 - [2026-06-04-preserve-legacy-plans-on-update](2026-06-04-preserve-legacy-plans-on-update.md)
+- [2026-09-14-version-control-ruleset](2026-09-14-version-control-ruleset.md) — implemented-verified (branch-per-feature, PR-at-start, commit-per-task)
 
 ## Legacy Archive
 - [legacy-plans](legacy-plans.md)

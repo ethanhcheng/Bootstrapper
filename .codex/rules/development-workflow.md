@@ -26,6 +26,18 @@ Source of truth: `rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
 8. Record outcomes in `plans/YYYY-MM.md`.
 9. Record per-item backlog audit status: `implemented-verified`, `partial`, or `not-implemented`.
 
+## Version Control
+1. Feature work starts on its own branch off the default branch. Never commit feature work directly to `main`/`master`.
+2. Open the pull request at the START of the work, not the end. Push the branch and open the PR as soon as the first commit exists, so progress is reviewable while it happens and CI runs on every push instead of only at the finish.
+3. Mark the PR as a draft while the work is incomplete, if the forge supports it.
+4. Each task or plan step is its own commit. A commit is the rollback unit: one self-contained change, together with its tests, revertable without unpicking unrelated work.
+5. Never bundle multiple plan tasks into one commit, and never split one logical change across commits such that an intermediate commit leaves the tree broken.
+6. Every commit leaves the test suite in the state the plan expects for that step: green for an implementation step, deliberately red only for a documented test-first step whose next commit makes it green.
+7. Commit messages state what changed and why. Record decisions, rejected alternatives, and any defect a test was proven to catch, so the reasoning survives in `git log` rather than only in chat.
+8. Push after each task rather than batching, so the PR reflects current state and an interrupted session costs one task at most.
+9. Never force-push a branch under review unless the human explicitly asks. A rejected push means the remote moved: investigate rather than overwrite.
+10. Do not merge your own pull request unless the human explicitly delegates it. Opening, updating, and reporting readiness is the agent's job; merging is the human's.
+
 ## Cross-Client Parity
 1. Backend/contract changes are incomplete until every impacted consumer (GUI, API client, companion app) is updated or the scope exception is explicitly documented in `plans/`.
 2. Shared UI/runtime surfaces must remain behaviorally aligned; when one shared surface changes, review and update the counterpart in the same task unless the change is explicitly scoped to one surface or platform.
