@@ -20,6 +20,7 @@
 - [2026-06-04-port-lost-governance-logic-from-jiggamumps](2026-06-04-port-lost-governance-logic-from-jiggamumps.md)
 - [2026-06-04-preserve-legacy-plans-on-update](2026-06-04-preserve-legacy-plans-on-update.md)
 - [2026-09-14-version-control-ruleset](2026-09-14-version-control-ruleset.md) — implemented-verified (branch-per-feature, PR-at-start, commit-per-task)
+- [2026-09-14-scaffold-version-gate](2026-09-14-scaffold-version-gate.md) — implemented-verified (version bump so content changes actually propagate)
 
 ## Legacy Archive
 - [legacy-plans](legacy-plans.md)
