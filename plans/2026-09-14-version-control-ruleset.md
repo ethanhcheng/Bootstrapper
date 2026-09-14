@@ -68,7 +68,13 @@ evidence. Restoring the modes by hand was still the right call -- committing a
 74-file mode diff around a 7-file rule change would have been noise -- but the
 cause was misdiagnosed.
 
-Original cause unknown; it predates 2026-09-14. See `plans/IDEAS.md`.
+Original cause unknown; it predates 2026-09-14. If the drift recurs, suspect whatever
+last wrote the tree wholesale -- `apply-bootstrapper-to-target.sh` or
+`update-local-codex-skill.sh` -- and check `git status` BEFORE running anything, so the
+baseline is known.
+
+Lesson worth keeping: check `git status` before starting work in a repo, so pre-existing
+drift is never mistaken for damage done by the current change.
 
 ## Downstream propagation
 
