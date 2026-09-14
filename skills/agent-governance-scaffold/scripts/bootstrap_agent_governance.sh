@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE_DIR="$ROOT_DIR/assets/templates"
-SCAFFOLD_VERSION="2026-05-19.1"
+SCAFFOLD_VERSION="2026-09-14.1"
 SOURCE_COMMIT=""
 
 if git -C "$ROOT_DIR" rev-parse --short HEAD >/dev/null 2>&1; then
@@ -113,6 +113,14 @@ manifest_version() {
   manifest_field "scaffold_version" "version"
 }
 
+# Drift is detected by VERSION, not by content: a downstream repo is considered
+# up to date whenever its manifest records the current SCAFFOLD_VERSION.
+#
+# Therefore any change to the scaffold's shipped content -- rules, templates,
+# plans scaffolding -- MUST bump SCAFFOLD_VERSION above. Without a bump,
+# --check-updates reports "up to date" on every downstream repo while they
+# silently miss the change, which is exactly what happened to the Version
+# Control rules added on 2026-09-14.
 needs_update() {
   [[ "$(manifest_version)" != "$SCAFFOLD_VERSION" ]]
 }
