@@ -6,12 +6,3 @@
 
 ## Active Ideas
 - Add new seed notes here as they appear.
-
-## sync-agent-rules.sh chmods the whole tree (found 2026-09-14)
-
-`scripts/sync-agent-rules.sh` sets mode 755 on ~67 unrelated files (plans, READMEs,
-templates) on every run, with zero content change. Effects: documentation is marked
-executable, and any real rule change arrives buried in a large mode-only diff.
-
-Fix: preserve modes, or write only the files whose content actually changed. Wanted
-as its own commit, separate from any rule change.

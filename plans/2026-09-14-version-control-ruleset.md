@@ -51,17 +51,30 @@ projects would never see the rule.
 - 7 files changed, all expected: the 4 sources, the generated consolidated
   ruleset, and 2 generated `.codex` mirrors.
 
-## Defect found: sync-agent-rules.sh chmods the entire tree
+## Correction: the reported sync-script defect was not real
 
-Running `scripts/sync-agent-rules.sh` changed the file mode of **67 unrelated
-files** from `644` to `755` -- every plan, README, and template in the repo --
-with zero content change. Left uncommitted, that would have buried a 7-file rule
-change in a 74-file diff, and marked documentation executable.
+This document originally reported that `scripts/sync-agent-rules.sh` chmods ~67
+unrelated files from 644 to 755 on every run. **That was wrong and is retracted.**
 
-The modes were restored by hand for this commit. The script itself is not fixed
-here; that is logged in `plans/IDEAS.md` as follow-up, since fixing it is a
-separate change from adding the rule and deserves its own commit under the very
-rule being added.
+The script does not modify file modes. Verified by direct test: `chmod 644` on
+`plans/IDEAS.md`, `README.md` and `projectbootstrapper.txt`, then running the
+script, leaves all three at 644 with no git diff. The 67 affected files also
+include plans, READMEs and templates the script never writes.
+
+The mode drift was already in the working tree before this work started. It was
+not noticed because `git status` was not checked first, so it surfaced in the
+same status output as the sync run and was attributed to the script on no
+evidence. Restoring the modes by hand was still the right call -- committing a
+74-file mode diff around a 7-file rule change would have been noise -- but the
+cause was misdiagnosed.
+
+Original cause unknown; it predates 2026-09-14. If the drift recurs, suspect whatever
+last wrote the tree wholesale -- `apply-bootstrapper-to-target.sh` or
+`update-local-codex-skill.sh` -- and check `git status` BEFORE running anything, so the
+baseline is known.
+
+Lesson worth keeping: check `git status` before starting work in a repo, so pre-existing
+drift is never mistaken for damage done by the current change.
 
 ## Downstream propagation
 
