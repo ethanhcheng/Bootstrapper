@@ -5,4 +5,4 @@ Use this file only when migrating historical planning content from an older root
 Rules:
 - Preserve historical entries.
 - Do not add new planning work here.
-- New planning entries belong in monthly files and implementation docs under `plans/`.
+- New work belongs in dated plan docs under `plans/`.

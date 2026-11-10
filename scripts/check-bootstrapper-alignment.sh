@@ -129,10 +129,6 @@ check_shared_scaffold() {
     compare_exact "$label" "$TEMPLATE_DIR/plans/IDEAS.md" "$base_dir/plans/IDEAS.md"
   fi
 
-  for src in "$TEMPLATE_DIR/.cursor/rules/"*; do
-    compare_exact "$label" "$src" "$base_dir/.cursor/rules/$(basename "$src")"
-  done
-
   for src in "$TEMPLATE_DIR/.claude/rules/"*; do
     compare_exact "$label" "$src" "$base_dir/.claude/rules/$(basename "$src")"
   done

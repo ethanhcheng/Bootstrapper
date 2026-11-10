@@ -40,12 +40,22 @@ This file is the project-specific source of truth for what this repository shoul
 - Optional flags:
 - Secrets handling rules:
 
-## Implementation Rules
+## Stack And Conventions
 
-- Preferred language(s):
+- Language(s), runtime, and frameworks:
+- Test command, and what CI runs:
+- Language-specific conventions the shared rules do not cover:
 - Dependency constraints:
 - Portability or path expectations:
 - Idempotency, logging, and error-handling expectations:
+
+## Work Tiers In This Project
+
+The shared rules define three tiers (ops/data, small change, feature). Say what each means here.
+
+- Ops/data work (committed straight to the default branch, no PR): which scripts or directories qualify, and any safety steps such as a dry run or a confirmation before touching production data.
+- Changes that always count as feature tier here:
+- Plan-doc `Category` values this project uses, and anything that reads the docs' `Summary` line:
 
 ## Verification
 

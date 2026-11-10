@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
-# Sync root governance files into assets/templates/ so the scaffold
-# templates always match what the skill installs into target repos.
+# Sync the Bootstrapper repo's own governance files into assets/templates/ so
+# the scaffold templates always match what the skill installs into target
+# repos. Only meaningful inside the Bootstrapper repo.
 #
 # Usage:
 #   scripts/sync-templates-from-self.sh           # write templates
 #   scripts/sync-templates-from-self.sh --check   # fail on drift
 #
 # Deliberately excluded:
-#   - plans/INDEX.md, plans/IDEAS.md, plans/YYYY-MM.md, plans/YYYY-MM-DD-*.md
-#     (project-specific content; template versions must keep their
-#     placeholder shape so newly scaffolded repos get a clean slate)
+#   - README.md, BOOTSTRAPPER_SPEC.md, plans/IDEAS.md, plans/YYYY-MM-DD-*.md,
+#     and the frozen plans/INDEX.md and plans/YYYY-MM.md (project-specific
+#     content; the template versions keep their placeholder shape so newly
+#     scaffolded repos get a clean slate)
+#   - .cursor/rules/ (generated in each target from .claude/rules/)
 #   - .agent-governance-manifest.json (regenerated per install)
 #   - projectbootstrapper.txt (generated inline by bootstrap with
 #     install-time path substitutions; the template copy is decorative
@@ -19,8 +22,14 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TEMPLATES_DIR="$ROOT_DIR/assets/templates"
+SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$SKILL_DIR/../.." && pwd)"
+TEMPLATES_DIR="$SKILL_DIR/assets/templates"
+
+if [[ ! -f "$ROOT_DIR/skills/agent-governance-scaffold/SKILL.md" ]]; then
+  echo "Not inside the Bootstrapper repo: $ROOT_DIR" >&2
+  exit 1
+fi
 CHECK_ONLY=0
 
 if [[ "${1:-}" == "--check" ]]; then
@@ -35,18 +44,11 @@ fi
 SYNCED_PATHS=(
   "AGENTS.md"
   "CLAUDE.md"
-  "README.md"
-  "BOOTSTRAPPER_SPEC.md"
   ".gitignore"
   ".codex/PROJECT_RULES.md"
-  ".cursor/rules/code-review.mdc"
-  ".cursor/rules/development-workflow.mdc"
-  ".cursor/rules/python-standards.mdc"
-  ".cursor/rules/sandbox-permissions.mdc"
-  ".cursor/rules/tech-stack.mdc"
   ".claude/rules/code-review.md"
+  ".claude/rules/coding-standards.md"
   ".claude/rules/development-workflow.md"
-  ".claude/rules/python-standards.md"
   ".claude/rules/sandbox-permissions.md"
   ".claude/rules/tech-stack.md"
   "plans/README.md"

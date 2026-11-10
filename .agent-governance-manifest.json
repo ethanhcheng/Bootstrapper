@@ -1,8 +1,9 @@
 {
-  "version": "2026-05-19.1",
-  "scaffold_version": "2026-05-19.1",
-  "updated_at_utc": "2026-05-19T18:09:32.432439+00:00",
+  "version": "2026-11-10.1",
+  "scaffold_version": "2026-11-10.1",
+  "updated_at_utc": "2026-11-10T21:55:51.929469+00:00",
   "source_kind": "agent-governance-scaffold",
-  "source_path": "/home/ethan/.codex/skills/agent-governance-scaffold",
-  "source_repo_commit": null
+  "source_path": "/home/ethan/Projects/Bootstrapper/skills/agent-governance-scaffold",
+  "source_repo_commit": "78b0fe9",
+  "plan_doc_headers_since": "2026-11-10"
 }

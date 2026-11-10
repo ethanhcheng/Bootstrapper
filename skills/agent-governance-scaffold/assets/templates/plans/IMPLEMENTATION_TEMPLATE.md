@@ -1,28 +1,25 @@
 # YYYY-MM-DD - feature-name
 
-## Request Summary
-- Describe the requested change clearly and concretely.
+- Date: YYYY-MM-DD
+- Status: in-progress
+- Category: feature
+- Summary: One plain-language sentence a non-developer could read, under 220 characters, with no code identifiers.
 
-## Full Agent Implementation Plan
-Paste the full implementation plan/output from the agent here before or during execution.
+## Request
+- What was asked for, in the requester's terms.
 
-## Execution Trace
-- Affected files:
-- Downstream dependents:
-- Integration points:
-- Current monthly checklist entry:
+## What Changed And Why
+- The change, the reasoning, and any alternative that was rejected.
 
-## Edge Cases / Risks / Assumptions
-- Edge cases:
-- Risks:
-- Assumptions:
+## Files And Integration Points
+- Files changed, what depends on them, and each layer the change crosses.
+
+## Edge Cases, Risks, Assumptions
+- What could go wrong, what was assumed, and what was deliberately left out.
 
 ## Verification
-- Commands run:
-- Results:
+- Commands run and what the output showed.
+- What was not verified.
 
-## Outcome
-- Status:
-- Follow-up items:
-- Monthly plan updated:
-- `plans/INDEX.md` updated:
+## Follow-Ups
+- Work this change leaves open.
