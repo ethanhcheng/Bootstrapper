@@ -12,14 +12,14 @@ This repository carries repo-local agent governance, planning workflow files, an
 
 ## Repo Layout
 
-- `.cursor/rules/` and `.claude/rules/`: editable source rule files.
-- `.codex/rules/` and `rulesets/`: generated mirrors; regenerate after rule edits.
+- `.claude/rules/`: the only place rules are edited.
+- `.cursor/rules/`, `.codex/rules/`, and `rulesets/`: generated copies; regenerate after rule edits.
 - `scripts/`: helper scripts for syncing rules and maintaining the plans workflow.
-- `plans/`: monthly checklists, implementation docs, and optional seed notes.
+- `plans/`: one dated, self-describing doc per change, plus optional seed notes.
 
 ## Working Model
 
-1. Read `BOOTSTRAPPER_SPEC.md` and the repo governance files before making changes.
-2. Keep significant work recorded in `plans/`.
-3. Re-run `scripts/sync-agent-rules.sh` after editing rule sources.
-4. Use `scripts/create-implementation-doc.sh YYYY-MM-DD feature-name` for significant updates.
+1. Fill in `BOOTSTRAPPER_SPEC.md`; the rules defer to it for the stack, the commands, and what each work tier means here.
+2. Record each change in `plans/` with `scripts/create-implementation-doc.sh YYYY-MM-DD short-name`.
+3. Re-run `scripts/sync-agent-rules.sh` after editing `.claude/rules/`.
+4. Run `scripts/verify-plans-workflow.sh` before pushing.

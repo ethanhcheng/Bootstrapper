@@ -26,18 +26,16 @@ If the operator installed the global `bootstrap` command (via the Bootstrapper r
   - `AGENTS.md`
   - `CLAUDE.md`
   - `.codex/PROJECT_RULES.md`
-- Editable rule sources:
-  - `.cursor/rules/*.mdc`
+- Rule source (the only place rules are edited):
   - `.claude/rules/*.md`
-- Generated mirrors:
+- Generated copies:
+  - `.cursor/rules/*.mdc`
   - `.codex/rules/*.md`
   - `rulesets/*.md`
 - Planning workflow:
   - `plans/README.md`
   - `plans/IMPLEMENTATION_TEMPLATE.md`
-  - `plans/INDEX.md`
-  - `plans/legacy-plans.md`
-  - current-month `plans/YYYY-MM.md` if missing
+  - `plans/legacy-plans.md` and `plans/IDEAS.md` if missing
 - Helper scripts:
   - `scripts/sync-agent-rules.sh`
   - `scripts/create-implementation-doc.sh`
@@ -50,9 +48,10 @@ If the operator installed the global `bootstrap` command (via the Bootstrapper r
 ## Safety Model
 
 - Governance-managed rule files and helper scripts are refreshed from the skill templates.
-- Existing monthly plan files are never overwritten, and missing required monthly headings are repaired when the file already exists.
+- Plan docs are never touched. Each one describes itself in its header (`Status`, `Category`, `Summary`), so there is no index or monthly file to maintain; an existing `plans/INDEX.md` or `plans/YYYY-MM.md` is left as frozen history.
+- Nothing is ever deleted. Files retired by a newer scaffold version are listed at the end of the run for a person to remove.
 - `README.md`, `BOOTSTRAPPER_SPEC.md`, and `projectbootstrapper.txt` are treated as repo-owned content after creation, so they are only created when missing.
-- The script writes `.agent-governance-manifest.json` with the scaffold version and source path so later checks can detect drift.
+- The script writes `.agent-governance-manifest.json` with the scaffold version and source path so later checks can detect drift, and `plan_doc_headers_since`, the date from which `scripts/verify-plans-workflow.sh` requires plan-doc headers.
 
 ## After Bootstrap
 
@@ -63,4 +62,6 @@ When working inside a bootstrapped repo, read:
 3. `BOOTSTRAPPER_SPEC.md`
 4. `rulesets/CONSOLIDATED_RULESET.md`
 
-If rule files change, re-run `scripts/sync-agent-rules.sh`.
+Fill in `BOOTSTRAPPER_SPEC.md` first: the rules defer to it for the stack, the commands, and what each work tier means in that project.
+
+If rule files change, edit `.claude/rules/` and re-run `scripts/sync-agent-rules.sh`.

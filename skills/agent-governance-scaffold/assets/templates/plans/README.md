@@ -1,26 +1,12 @@
 # Plans Directory
 
-- `plans/` is the only planning workspace.
-- `plans/IDEAS.md` is the inbox for future ideas, pasted reference material, and research notes that are not active implementation work yet.
-- Append-only monthly plan files: `plans/YYYY-MM.md`.
-- Keep `plans/INDEX.md` current.
-- Never delete historical plan entries.
-- Update planning artifacts before implementation, during meaningful scope changes, and immediately after verification.
-- Treat missing `plans/` updates for changed functionality as an incomplete task.
-- Each monthly file is the general checklist for features implemented during that period.
-- For reviewed backlog items, record `implemented-verified`, `partial`, or `not-implemented` with evidence.
-- For each significant feature update, create a standalone implementation document:
-  - `plans/YYYY-MM-DD-feature-name.md`
-- Each implementation document must include:
-  - the request summary
-  - the full implementation plan copied from the agent output
-  - affected files and integration points
-  - verification commands and outcomes
-  - final status and follow-up items
-- Each monthly checklist entry should link to the dated implementation document for that feature update.
-- Significant code changes must leave an append-only audit trail in `plans/` describing what changed, why it changed, and how it was verified.
-- Seed notes may live directly under `plans/` when they hold pasted documentation or research context; preserve that content and add workflow guidance around it instead of replacing it.
-- Promote seed notes into dated implementation docs once coding starts, but keep the original seed notes as reference context.
-- If migrating from an older root planning file, preserve it as `plans/legacy-plans.md`.
-- Do not overwrite existing monthly plan files during bootstrap updates; only create missing scaffolding.
-- Use `scripts/create-implementation-doc.sh` to create dated implementation docs and update `plans/INDEX.md`.
+`plans/` is the only planning workspace and the durable record of what changed and why. The development-workflow rule file has the full rules; this is the short version.
+
+- One file per change: `plans/YYYY-MM-DD-short-name.md`, created with `scripts/create-implementation-doc.sh YYYY-MM-DD short-name`.
+- Each doc describes itself in its header: `Status`, `Category`, and a one-line plain-language `Summary`. Nothing else needs editing, so parallel branches never touch the same file.
+- Status values: `planned`, `in-progress`, `partial`, `implemented-verified`, `not-implemented`.
+- To find prior work, search filenames and contents: `ls plans | grep -i <keyword>` or `grep -l -i <keyword> plans/*.md`.
+- Docs for finished work are history. Append corrections; never rewrite or delete.
+- `plans/IDEAS.md` is the inbox for ideas and reference material that are not active work yet.
+- `plans/INDEX.md`, `plans/YYYY-MM.md`, and `plans/legacy-plans.md`, where they exist, are frozen history from earlier workflows. Do not add to them.
+- `scripts/verify-plans-workflow.sh` checks that every doc written under this workflow has a valid header.

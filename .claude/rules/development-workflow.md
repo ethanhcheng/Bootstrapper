@@ -1,90 +1,77 @@
 # Development Workflow
 
-Source of truth: `rulesets/CONSOLIDATED_RULESET.md` (stricter policy wins).
+## Work Tiers
 
-## Repo-Specific Inputs
-1. Read `BOOTSTRAPPER_SPEC.md` before planning or implementing project behavior.
-2. Use `README.md` for repo layout and workflow notes.
-3. Treat `projectbootstrapper.txt` as a legacy reference only unless it has been promoted into `BOOTSTRAPPER_SPEC.md`.
+Choose the lightest tier that fits. When unsure, use the heavier one. `BOOTSTRAPPER_SPEC.md` may name this project's examples of each tier.
 
-## Gate A: Pre-Change Trace
-1. Trace impacted execution paths.
-2. List touched files and dependents.
-3. List edge cases.
-4. Record checklist in `plans/YYYY-MM.md`.
-5. List in-scope backlog items from plans that must be audited.
-6. List each affected backend/frontend integration hop: route, storage/model output, API wrapper, page/module consumer, and UI display target.
-
-## Gate B: Post-Change Continuity Review
-1. Re-trace end-to-end behavior.
-2. When old code paths are replaced, verify continuity for existing data and legacy behavior.
-3. Verify signatures and imports.
-4. Run feasible checks.
-5. Verify runtime backend-to-frontend flow so requested data loads and renders in the intended UI.
-6. Run full end-to-end UI regression for affected pages/flows.
-7. Evaluate against all Full Code Review Dimensions (see `.claude/rules/code-review.md` / `rulesets/CONSOLIDATED_RULESET.md` § Full Code Review Dimensions): resource efficiency, speed, concurrency, memory leaks, edge cases, error handling, security, contract consistency.
-8. Record outcomes in `plans/YYYY-MM.md`.
-9. Record per-item backlog audit status: `implemented-verified`, `partial`, or `not-implemented`.
+| Tier | Covers | Branch and PR | Depth |
+|---|---|---|---|
+| Ops/data | One-off operational scripts and data entry. Touches no application code, tests, CI, dependencies, or config. | Commit to the default branch. No PR. | Dry run first, then read back the result. |
+| Small change | A contained fix or tweak. No API contract, schema, auth, or dependency change. | One branch, one PR, opened when the work is ready. | Gates A and B, proportionate to the change. |
+| Feature | A new feature; an API contract, schema, auth or permission, dependency, or shared-utility change; anything that spans sessions. | A branch, plus a draft PR at the first commit. | Gates A and B in full, plus the full review in `code-review.md`. |
 
 ## Version Control
-1. Feature work starts on its own branch off the default branch. Never commit feature work directly to `main`/`master`.
-2. Open the pull request at the START of the work, not the end. Push the branch and open the PR as soon as the first commit exists, so progress is reviewable while it happens and CI runs on every push instead of only at the finish.
-3. Mark the PR as a draft while the work is incomplete, if the forge supports it.
-4. Each task or plan step is its own commit. A commit is the rollback unit: one self-contained change, together with its tests, revertable without unpicking unrelated work.
-5. Never bundle multiple plan tasks into one commit, and never split one logical change across commits such that an intermediate commit leaves the tree broken.
-6. Every commit leaves the test suite in the state the plan expects for that step: green for an implementation step, deliberately red only for a documented test-first step whose next commit makes it green.
-7. Commit messages state what changed and why. Record decisions, rejected alternatives, and any defect a test was proven to catch, so the reasoning survives in `git log` rather than only in chat.
-8. Push after each task rather than batching, so the PR reflects current state and an interrupted session costs one task at most.
-9. Never force-push a branch under review unless the human explicitly asks. A rejected push means the remote moved: investigate rather than overwrite.
-10. Do not merge your own pull request unless the human explicitly delegates it. Opening, updating, and reporting readiness is the agent's job; merging is the human's.
+
+1. Start from the current default branch: fetch, then branch from its tip. Branch from another unmerged branch only when the work depends on it, and say so in the PR.
+2. One PR per piece of work, not per edit. Follow-up edits to work whose PR is still open go on that branch. Related small changes from the same session share one branch and one PR.
+3. One commit per logical step, together with its tests. Each commit leaves the suite in the state that step expects: green, or deliberately red only for a documented test-first step that the next commit turns green.
+4. Commit messages say what changed and why, including rejected alternatives and any defect a test was shown to catch.
+5. Push when a step is complete, so an interrupted session loses at most one step.
+6. Never force-push a branch under review unless the human asks. A rejected push means the remote moved: investigate, do not overwrite.
+7. When an open PR conflicts with the default branch, bring the default branch in and resolve both sides. Never discard either side to make the conflict go away.
+8. Never merge a pull request. Opening it, updating it, and reporting that it is ready is the agent's job; merging is the human's.
+9. No agent attribution anywhere: no `Co-Authored-By` trailers, no "generated with" footers, no agent names in commits, PR titles or bodies, branch names, code comments, or docs.
+10. Clean up after yourself: remove the worktrees and local branches you created once their work has merged.
+
+## Gate A: Before Changing Code
+
+1. Trace the execution paths the change touches.
+2. List the files to change and everything that depends on them.
+3. For a change that crosses layers, list each hop: route, storage or model output, API wrapper, consumer, and where the result is displayed.
+4. List the edge cases that apply (see `code-review.md`).
+
+## Gate B: Before Calling It Done
+
+1. Re-trace the changed paths end to end. Confirm imports and signatures.
+2. Where an old code path was replaced, confirm existing data and legacy behavior still work.
+3. Run the tests (see Verification).
+4. For UI changes, exercise the affected pages in a running app. If that was not possible, say so explicitly.
+5. Feature tier: run the full review in `code-review.md`.
+6. Record what was verified, and how, in the plan doc.
+
+## Verification
+
+- While iterating, run the tests that cover the change.
+- Run the full suite once before pushing, and again only if code changed afterwards. CI is the final gate.
+- Report results from actual output. Never claim a pass that was not observed.
 
 ## Cross-Client Parity
-1. Backend/contract changes are incomplete until every impacted consumer (GUI, API client, companion app) is updated or the scope exception is explicitly documented in `plans/`.
-2. Shared UI/runtime surfaces must remain behaviorally aligned; when one shared surface changes, review and update the counterpart in the same task unless the change is explicitly scoped to one surface or platform.
-3. Companion/admin clients may diverge intentionally, but they must still reflect backend contract changes relevant to their scope.
-4. Backend feature work is not complete until the relevant frontend surfaces reflect the change or the scoped omission is documented in `plans/`.
 
-## Abstraction Requirements
-1. Create explicit abstraction seams where upgrades are likely: providers, transport, storage, runtime controllers, and platform adapters.
-2. Prefer cohesive classes or focused modules for stateful workflows and lifecycle-heavy logic.
-3. Prefer composition over inheritance; use inheritance only for stable shared contracts with multiple implementations.
-4. Keep platform shells thin and move shared behavior into neutral shared packages/modules.
-5. Every new abstraction must justify itself by replaceability, testability, or platform separation; speculative wrappers are not allowed.
-6. When replacing old code paths with a new abstraction, move all callers to the seam or record the staged migration in `plans/`.
+- A backend or contract change is incomplete until every consumer (GUI, API client, companion app) is updated, or the omission is recorded in the plan doc.
+- When one shared UI or runtime surface changes, review its counterpart in the same task unless the change is explicitly scoped to one surface.
 
-## Planning Requirements
-1. Append every new task to the active monthly file in `plans/`.
-2. Never overwrite historical entries; only append status/results.
-3. Add significant implementation docs as `plans/YYYY-MM-DD-feature-name.md`.
-4. Update `plans/INDEX.md` when adding implementation docs.
-5. If migrating older planning history, keep it only in `plans/legacy-plans.md`.
-6. Update planning artifacts before implementation, during meaningful scope changes, and immediately after verification.
-7. Treat missing `plans/` updates for changed functionality as an incomplete task.
+## Abstraction
 
-## Required Plans Workflow
-1. `plans/` is the only planning workspace.
-2. Each monthly file `plans/YYYY-MM.md` is the general checklist for features implemented during that period.
-3. Each significant feature update must have its own dated implementation document: `plans/YYYY-MM-DD-feature-name.md`.
-4. The implementation document must include the full implementation plan copied from the agent output for that feature.
-5. The implementation document filename must include the date and a concise description of what was updated.
-6. The monthly checklist must reference the dated implementation document for the feature.
-7. `plans/INDEX.md` must link both active monthly files and implementation documents.
-8. A task is not complete unless both the monthly checklist entry and the dated implementation document exist for significant feature work.
-9. Significant code changes must leave an append-only audit trail in `plans/` describing what changed, why it changed, and how it was verified.
+- Create seams where replacement is likely: providers, transport, storage, runtime controllers, platform adapters.
+- Prefer cohesive classes or focused modules for stateful, lifecycle-heavy logic, and composition over inheritance.
+- Keep platform shells thin; move shared behavior into neutral shared modules.
+- Every new abstraction must earn its place through replaceability, testability, or platform separation. No speculative wrappers.
+- When a new seam replaces old code paths, move every caller, or record the staged migration in the plan doc.
 
-## Implementation Document Requirements
-1. Record the request summary.
-2. Copy the full agent implementation plan/output into the document.
-3. Record affected files, dependencies, and integration points.
-4. Record edge cases, risks, and assumptions.
-5. Record verification commands and results.
-6. Record final implementation status and follow-up items.
+## Plans
 
-## Plans As Reference Library
-1. At the start of any new task, scan `plans/INDEX.md` to see what features have already been implemented.
-2. Before implementing something similar to prior work, read the matching `plans/YYYY-MM-DD-feature-name.md` to:
-   - Match prior conventions, patterns, and architectural choices.
-   - Surface lessons learned, edge cases, and follow-up items recorded by previous agents.
-   - Avoid duplicating work that has already been done.
-3. Read individual dated docs on demand only. The INDEX is the directory; bodies are read when relevant. Do not exhaustively load every plan into context.
-4. If a prior implementation conflicts with the current request, surface the conflict to the user rather than silently overriding it.
+`plans/` is the only planning workspace and the durable record of what changed and why.
+
+1. Every PR and every ops/data task gets exactly one new file, `plans/YYYY-MM-DD-short-name.md`, created from `plans/IMPLEMENTATION_TEMPLATE.md` (`scripts/create-implementation-doc.sh YYYY-MM-DD short-name`).
+2. The doc describes itself. Its header carries `Status`, `Category`, and a one-line plain-language `Summary`. There is no index or monthly file to update, so two branches never edit the same plans file.
+3. Create it with `Status: in-progress` in the first commit. Before asking for review, set the final status (`implemented-verified`, `partial`, or `not-implemented`) and fill in Verification.
+4. Keep it a record, not a transcript: the request, what changed and why, files and integration points, edge cases and risks, verification commands with their results, and follow-ups. Do not paste the chat plan or restate the diff.
+5. Later edits to the same work update its doc. Docs for finished work are history: append corrections, never rewrite or delete.
+6. A change without its plan doc is incomplete. Run `scripts/verify-plans-workflow.sh` before pushing.
+7. `plans/INDEX.md` and `plans/YYYY-MM.md`, where they exist, are frozen history from the previous workflow. Do not add to them.
+8. Ideas and reference material that are not yet work go in `plans/IDEAS.md`.
+
+## Context Discipline
+
+- One task per session where possible. Plan docs and git history carry context between sessions, so a fresh session loses nothing. When an unrelated task starts in a long-running session, say once that a fresh session would be cheaper.
+- Read files in the ranges needed, not wholesale. Search by keyword before opening.

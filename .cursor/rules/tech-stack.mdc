@@ -1,9 +1,8 @@
-# Technology Stack Guidance
+# Technology Stack
 
-- This repository is documentation-first and governance-first; keep project requirements in `BOOTSTRAPPER_SPEC.md`.
-- Keep machine setup and GitHub workflow steps in `README.md`.
-- Preserve `.cursor/`, `.claude/`, `.codex/`, `rulesets/`, `plans/`, and `scripts/` in version control so cloned copies behave consistently across machines.
-- Prefer existing stack patterns before adding dependencies. Unless a new dependency offers optimizations. If implementing a new dependency to replace an old one, make sure the old code that uses it traces with the new dependency/library.
-- Centralize API wrappers and shared transformations.
-- Keep route handlers thin and integration points explicit.
-- Background services, popup daemons, polling scripts, and agent-facing helpers must be resource-conscious: minimize idle RAM, keep polling intervals no tighter than needed, prefer cached or event-driven data over heavyweight long-lived processes, and never keep agent CLIs running in the background when on-demand reads are sufficient.
+- Stack facts (languages, frameworks, commands, deploy target) live in `BOOTSTRAPPER_SPEC.md`. Setup and operator steps live in `README.md`.
+- Prefer the patterns and libraries already in the repo. Add a dependency only when it clearly beats what exists. When replacing one, trace every use of the old one.
+- Before adding or upgrading a dependency, check its current documentation instead of relying on memory.
+- Centralize API wrappers and shared transformations. Keep route handlers thin and integration points explicit.
+- Background services, pollers, and helper daemons stay resource-conscious: minimal idle memory, polling no tighter than needed, cached or event-driven data over long-lived heavy processes, and no agent CLI left running when an on-demand read would do.
+- Do not delete, move, or gitignore the governance files (`.cursor/`, `.claude/rules/`, `.codex/`, `rulesets/`, `plans/`, `scripts/`) on your own. Whether a repo tracks them or keeps them local is the owner's decision.

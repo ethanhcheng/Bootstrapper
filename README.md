@@ -10,15 +10,15 @@ This repository is the canonical GitHub source for the portable agent-governance
 - `scripts/check-bootstrapper-alignment.sh`: checks repo-root, embedded-skill, local-skill, and optional target-repo alignment.
 - `scripts/install-bootstrap-command.sh`: installs a global `bootstrap` command (`~/.local/bin/bootstrap`) that scaffolds the current directory from this clone.
 - `scripts/update-local-codex-skill.sh`: refreshes `~/.codex/skills/agent-governance-scaffold` from this repo clone.
-- `plans/`: append-only implementation and verification trail for Bootstrapper itself.
+- `plans/`: append-only record of changes to Bootstrapper itself.
 
 ## Repo Layout
 
 - `skills/agent-governance-scaffold/`: installable Codex skill with templates and the canonical embedded bootstrap script.
-- `.cursor/rules/` and `.claude/rules/`: editable source rule files.
-- `.codex/rules/` and `rulesets/`: generated mirrors; regenerate after rule edits.
+- `.claude/rules/`: the only place rules are edited.
+- `.cursor/rules/`, `.codex/rules/`, and `rulesets/`: generated copies; run `scripts/sync-agent-rules.sh` after a rule edit, then `skills/agent-governance-scaffold/scripts/sync-templates-from-self.sh` to refresh the templates.
 - `scripts/`: repo-root wrapper commands plus the shared scaffold maintenance scripts.
-- `plans/`: monthly checklists and dated implementation docs for Bootstrapper work.
+- `plans/`: one dated, self-describing doc per change to Bootstrapper.
 
 ## Working Model
 

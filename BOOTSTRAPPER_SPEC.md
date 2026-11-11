@@ -65,6 +65,9 @@ bootstrap --check-updates
 ## Implementation Rules
 
 - Keep portable governance improvements in the embedded skill; do not pull personal desktop/runtime config into this repo.
+- Rules stay stack-neutral. Anything specific to one language, framework, or project belongs in that project's `BOOTSTRAPPER_SPEC.md`, not in the shared rule files.
+- Any change to shipped content (rules, templates, helper scripts) bumps `SCAFFOLD_VERSION`, or downstream repos never see it.
+- The scaffold never deletes a file in a target repo. A file retired by a new version is added to `RETIRED_FILES` in `scripts/sync-agent-rules.sh`, which reports it for a person to remove.
 - Treat `skills/agent-governance-scaffold/` as the canonical scaffold source and the repo root as its self-hosted consumer.
 - Preserve repo-owned target history and create-if-missing docs when bootstrapping downstream repos.
 - The installed local Codex skill is fully managed, but it should only be refreshed through the explicit repo-root updater after the embedded repo copy is validated.
@@ -74,7 +77,8 @@ bootstrap --check-updates
 - `./scripts/check-bootstrapper-alignment.sh` reports the repo root aligned with the embedded skill.
 - `./scripts/check-bootstrapper-alignment.sh --target /path/to/local/bootstrapper` reports whether another local Bootstrapper copy is behind this repo clone.
 - `./scripts/bootstrap_agent_governance.sh --check-updates /path/to/repo` reports current or drifted status for a downstream target.
-- `./scripts/bootstrap_agent_governance.sh /path/to/non-git-folder` succeeds even when `plans/<current-month>.md` already exists but is missing required scaffold headings.
+- `./scripts/bootstrap_agent_governance.sh /path/to/non-git-folder` succeeds on an empty folder and on a repo that still has the older `plans/INDEX.md` and monthly files, and leaves those files untouched.
+- `./skills/agent-governance-scaffold/scripts/sync-templates-from-self.sh --check` reports the templates match the repo-root governance files.
 - `./scripts/update-local-codex-skill.sh` followed by `diff -qr` makes the installed local skill byte-match the embedded repo skill.
 - `./scripts/install-bootstrap-command.sh` installs `~/.local/bin/bootstrap`; a bare `bootstrap` in an empty directory then produces the full scaffold and `bootstrap --check-updates` reports it up to date.
 

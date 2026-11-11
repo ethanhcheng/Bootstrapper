@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE_DIR="$ROOT_DIR/assets/templates"
-SCAFFOLD_VERSION="2026-09-14.1"
+SCAFFOLD_VERSION="2026-11-10.1"
 SOURCE_COMMIT=""
 
 if git -C "$ROOT_DIR" rev-parse --short HEAD >/dev/null 2>&1; then
@@ -169,173 +169,9 @@ ensure_gitignore_lines() {
   done < "$TEMPLATE_DIR/.gitignore"
 }
 
-ensure_plan_index() {
-  local current_month="$1"
-  local index_path="$TARGET_DIR/plans/INDEX.md"
-  local template_index="$TEMPLATE_DIR/plans/INDEX.md"
-  local ideas_exists="0"
-
-  if [[ -f "$TARGET_DIR/plans/IDEAS.md" ]]; then
-    ideas_exists="1"
-  fi
-
-  python3 - "$index_path" "$current_month" "$template_index" "$ideas_exists" <<'PY'
-import sys
-from pathlib import Path
-
-index_path = Path(sys.argv[1])
-current_month = sys.argv[2]
-template_index = Path(sys.argv[3])
-ideas_exists = sys.argv[4] == "1"
-month_entry = f"- [{current_month}]({current_month}.md)"
-ideas_entry = "- [IDEAS](IDEAS.md)"
-active_placeholder = "- Add monthly files like `[YYYY-MM](YYYY-MM.md)` here as they are created."
-
-if index_path.exists():
-    content = index_path.read_text(encoding="utf-8")
-else:
-    content = template_index.read_text(encoding="utf-8")
-
-lines = content.splitlines()
-
-def ensure_heading(title: str) -> None:
-    heading = f"## {title}"
-    if heading not in lines:
-        if lines and lines[-1] != "":
-            lines.append("")
-        lines.append(heading)
-
-def section_insert_index(heading: str) -> int:
-    insert_at = lines.index(heading) + 1
-    while insert_at < len(lines) and not lines[insert_at].startswith("## "):
-        insert_at += 1
-    while insert_at > 0 and lines[insert_at - 1] == "":
-        insert_at -= 1
-    return insert_at
-
-ensure_heading("Active")
-ensure_heading("Seed Notes / Idea Backlog")
-ensure_heading("Implementation Docs")
-ensure_heading("Legacy Archive")
-
-if "- [legacy-plans](legacy-plans.md)" not in lines:
-    lines.insert(section_insert_index("## Legacy Archive"), "- [legacy-plans](legacy-plans.md)")
-
-if month_entry not in lines:
-    lines = [line for line in lines if line != active_placeholder]
-    lines.insert(section_insert_index("## Active"), month_entry)
-
-if ideas_exists and ideas_entry not in lines:
-    lines.insert(section_insert_index("## Seed Notes / Idea Backlog"), ideas_entry)
-
-collapsed = []
-for line in lines:
-    if line == "" and collapsed and collapsed[-1] == "":
-        continue
-    collapsed.append(line)
-
-index_path.parent.mkdir(parents=True, exist_ok=True)
-index_path.write_text("\n".join(collapsed).rstrip() + "\n", encoding="utf-8")
-PY
-}
-
-ensure_current_month_plan() {
-  local current_month="$1"
-  local current_date
-  current_date="$(date +%Y-%m-%d)"
-  local month_path="$TARGET_DIR/plans/$current_month.md"
-
-  if [[ ! -f "$month_path" ]]; then
-    cat > "$month_path" <<EOF
-# $current_month Plans
-
-## Monthly Feature Checklist
-- Add one checklist entry per significant feature implementation.
-- Each entry should include:
-  - the implementation date
-  - a short summary
-  - status such as \`planned\`, \`in-progress\`, or \`implemented-verified\`
-  - a \`Doc:\` line pointing to \`plans/YYYY-MM-DD-feature-name.md\`
-- Update this file before implementation, during meaningful scope changes, and after verification.
-- Missing monthly checklist updates mean the task is not complete.
-
-## $current_date - Governance Bootstrap
-
-### Pre-Change Trace (Gate A)
-- [ ] Identify affected files and dependents.
-- [ ] Enumerate edge cases.
-- [ ] Record integration points and downstream consumers.
-
-### Plan
-- [ ] Implement requested changes.
-- [ ] Validate integrations.
-- [ ] Record verification outcomes.
-
-### Optimization / Improvement Additions
-- [ ] Add future improvements discovered during implementation review.
-
-### Post-Change Continuity Review (Gate B)
-- [ ] Re-trace modified paths.
-- [ ] Verify signatures/imports/dependents.
-- [ ] Record verification commands and outcomes.
-
-## Implementation Docs Created
-- Add one entry for each dated implementation document created this month.
-- Record whether each item is \`implemented-verified\`, \`partial\`, or \`not-implemented\`.
-EOF
-    return
-  fi
-
-  python3 - "$month_path" <<'PY'
-import sys
-from pathlib import Path
-
-month_path = Path(sys.argv[1])
-lines = month_path.read_text(encoding="utf-8").splitlines()
-
-def ensure_heading(title: str, content_lines: list[str]) -> None:
-    heading = f"## {title}"
-    if heading in lines:
-        return
-    if lines and lines[-1] != "":
-        lines.append("")
-    lines.append(heading)
-    lines.extend(content_lines)
-
-ensure_heading(
-    "Monthly Feature Checklist",
-    [
-        "- Add one checklist entry per significant feature implementation.",
-        "- Each entry should include:",
-        "  - the implementation date",
-        "  - a short summary",
-        "  - status such as `planned`, `in-progress`, or `implemented-verified`",
-        "  - a `Doc:` line pointing to `plans/YYYY-MM-DD-feature-name.md`",
-        "- Update this file before implementation, during meaningful scope changes, and after verification.",
-        "- Missing monthly checklist updates mean the task is not complete.",
-    ],
-)
-
-ensure_heading(
-    "Implementation Docs Created",
-    [
-        "- Add one entry for each dated implementation document created this month.",
-        "- Record whether each item is `implemented-verified`, `partial`, or `not-implemented`.",
-    ],
-)
-
-collapsed = []
-for line in lines:
-    if line == "" and collapsed and collapsed[-1] == "":
-        continue
-    collapsed.append(line)
-
-month_path.write_text("\n".join(collapsed).rstrip() + "\n", encoding="utf-8")
-PY
-}
-
 write_manifest() {
   python3 - "$MANIFEST_PATH" "$SCAFFOLD_VERSION" "$ROOT_DIR" "$SOURCE_COMMIT" <<'PY'
+import datetime
 import json
 import sys
 from pathlib import Path
@@ -345,15 +181,28 @@ version = sys.argv[2]
 source_path = sys.argv[3]
 source_commit = sys.argv[4]
 
+previous = {}
+if path.exists():
+    try:
+        previous = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        previous = {}
+
+# The date from which plan docs must carry a Status/Category/Summary header.
+# Set once, the first time a scaffold version with that convention lands, and
+# kept on every later update so older docs are never retroactively failed.
+headers_since = previous.get("plan_doc_headers_since") or datetime.date.today().isoformat()
+
 path.write_text(
     json.dumps(
         {
             "version": version,
             "scaffold_version": version,
-            "updated_at_utc": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+            "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "source_kind": "agent-governance-scaffold",
             "source_path": source_path,
             "source_repo_commit": source_commit or None,
+            "plan_doc_headers_since": headers_since,
         },
         indent=2,
     )
@@ -388,20 +237,15 @@ EOF
 }
 
 install_scaffold() {
-  local current_month
-  current_month="$(date +%Y-%m)"
-
   ensure_gitignore_lines
 
   copy_managed_file "$TEMPLATE_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
   copy_managed_file "$TEMPLATE_DIR/CLAUDE.md" "$TARGET_DIR/CLAUDE.md"
   copy_managed_file "$TEMPLATE_DIR/.codex/PROJECT_RULES.md" "$TARGET_DIR/.codex/PROJECT_RULES.md"
 
+  # .cursor/rules, .codex/rules, and rulesets/ are generated from
+  # .claude/rules by sync-agent-rules.sh below.
   local src
-  for src in "$TEMPLATE_DIR/.cursor/rules/"*; do
-    copy_managed_file "$src" "$TARGET_DIR/.cursor/rules/$(basename "$src")"
-  done
-
   for src in "$TEMPLATE_DIR/.claude/rules/"*; do
     copy_managed_file "$src" "$TARGET_DIR/.claude/rules/$(basename "$src")"
   done
@@ -421,8 +265,6 @@ install_scaffold() {
   copy_if_missing "$TEMPLATE_DIR/plans/legacy-plans.md" "$TARGET_DIR/plans/legacy-plans.md"
   copy_if_missing "$TEMPLATE_DIR/plans/IDEAS.md" "$TARGET_DIR/plans/IDEAS.md"
 
-  ensure_plan_index "$current_month"
-  ensure_current_month_plan "$current_month"
   write_legacy_note_if_missing
   write_manifest
 
